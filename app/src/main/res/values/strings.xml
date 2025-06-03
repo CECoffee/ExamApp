@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">在线考试系统</string>
+    <string name="tab_pending">待考</string>
+    <string name="tab_completed">已考</string>
+    <string name="tab_expired">已过期</string>
+    <string name="wrong_questions_title">错题本</string>
+    <string name="exam_title">考试</string>
+</resources>

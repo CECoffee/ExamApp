@@ -1,5 +1,6 @@
 package dev.coffee.examapp.viewmodel
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.coffee.examapp.model.WrongQuestion
@@ -12,9 +13,7 @@ import kotlinx.coroutines.launch
 
 class WrongQuestionViewModel : ViewModel() {
     private val apiService: ApiService = RetrofitClient.instance
-
-    private val _wrongQuestions = MutableStateFlow<List<WrongQuestion>>(emptyList())
-    val wrongQuestions: StateFlow<List<WrongQuestion>> = _wrongQuestions.asStateFlow()
+    val wrongQuestions = MutableStateFlow<List<WrongQuestion>>(emptyList())
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
@@ -28,6 +27,16 @@ class WrongQuestionViewModel : ViewModel() {
     private val _hasMore = MutableStateFlow(true)
     val hasMore: StateFlow<Boolean> = _hasMore.asStateFlow()
 
+    // 删除状态
+    sealed class DeleteState {
+        object Idle : DeleteState()
+        object Loading : DeleteState()
+        object Success : DeleteState()
+        data class Error(val message: String) : DeleteState()
+    }
+
+    val deleteState = mutableStateOf<DeleteState>(DeleteState.Idle)
+
     fun loadWrongQuestions(token: String, page: Int = 1) {
         viewModelScope.launch {
             _isLoading.value = true
@@ -39,9 +48,9 @@ class WrongQuestionViewModel : ViewModel() {
                     val newQuestions = response.body() ?: emptyList()
 
                     if (page == 1) {
-                        _wrongQuestions.value = newQuestions
+                        wrongQuestions.value = newQuestions
                     } else {
-                        _wrongQuestions.value = _wrongQuestions.value + newQuestions
+                        wrongQuestions.value = wrongQuestions.value + newQuestions
                     }
 
                     _hasMore.value = newQuestions.isNotEmpty()
@@ -64,6 +73,18 @@ class WrongQuestionViewModel : ViewModel() {
     fun loadNextPage(token: String) {
         if (!isLoading.value && hasMore.value) {
             loadWrongQuestions(token, currentPage.value + 1)
+        }
+    }
+
+    suspend fun deleteWrongQuestion(token: String, id: Int) {
+        try {
+            deleteState.value = DeleteState.Loading
+            // 实际网络请求
+            apiService.deleteWrongQuestion(token, questionId = id)
+            deleteState.value = DeleteState.Success
+            refresh(token) // 刷新数据
+        } catch (e: Exception) {
+            deleteState.value = DeleteState.Error(e.message ?: "删除失败")
         }
     }
 }

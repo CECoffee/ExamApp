@@ -1,24 +1,48 @@
 package dev.coffee.examapp.ui.screens.wrong
 
+import android.annotation.SuppressLint
+import android.widget.Toast
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
 import dev.coffee.examapp.R
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.FractionalThreshold
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.rememberSwipeableState
+import androidx.compose.material.swipeable
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import dev.coffee.examapp.model.WrongQuestion
 import dev.coffee.examapp.ui.components.LoadingIndicator
 import dev.coffee.examapp.ui.components.WrongQuestionCard
 import dev.coffee.examapp.viewmodel.WrongQuestionViewModel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
 
 @Composable
 fun WrongQuestionScreen(
@@ -29,10 +53,24 @@ fun WrongQuestionScreen(
     val isLoading by viewModel.isLoading.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
 
+    // TODO 传递真实token
+    val token = "fake_token"
+
     // 初始化加载数据
     LaunchedEffect(Unit) {
-        // 在实际应用中，这里应该传递真实的token
-        viewModel.refresh("fake_token")
+
+        // 用于测试的wrongQuestion实例
+//        val testWrongQuestion = WrongQuestion(
+//            questionId = 1,
+//            content = "这是测试题目内容",
+//            myAnswer = "B",
+//            correctAnswer = "A",
+//            collected = false
+//        )
+//         viewModel.wrongQuestions.value = listOf(testWrongQuestion)
+
+
+        viewModel.refresh(token)
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -79,12 +117,20 @@ fun WrongQuestionScreen(
                 contentPadding = PaddingValues(vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(wrongQuestions) { question ->
-                    WrongQuestionCard(
-                        question = question,
-                        onViewExplanation = { /* 处理查看解析逻辑 */ },
-                        onToggleBookmark = { /* 处理收藏逻辑 */ }
-                    )
+                items(
+                    items = wrongQuestions,
+                    key = { it.questionId }
+                ) { question ->
+                    SwipeToDeleteContainer(
+                        onDelete = { viewModel.deleteWrongQuestion(token, question.questionId) },
+                        deleteEnabled = true
+                    ) {
+                        WrongQuestionCard(
+                            question = question,
+                            onViewExplanation = { /* TODO */ },
+                            onToggleBookmark = { /* TODO */ }
+                        )
+    }
                 }
 
                 // 加载更多
@@ -103,7 +149,7 @@ fun WrongQuestionScreen(
                         }
                     } else if (wrongQuestions.isNotEmpty()) {
                         Button(
-                            onClick = { viewModel.loadNextPage("fake_token") },
+                            onClick = { viewModel.loadNextPage(token) },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp, vertical = 8.dp),
@@ -120,4 +166,141 @@ fun WrongQuestionScreen(
             }
         }
     }
+}
+
+// 滑动删除容器组件
+@SuppressLint("UnrememberedMutableState")
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun SwipeToDeleteContainer(
+    onDelete: suspend () -> Unit,
+    deleteEnabled: Boolean,
+    content: @Composable () -> Unit
+) {
+    val density = LocalDensity.current
+    val context = LocalContext.current
+
+    // TODO 滑动状态控制
+    val swipeState = rememberSwipeableState(initialValue = SwipePosition.Closed)
+    val swipeAnchors = remember(density) {
+        mapOf(
+            0f to SwipePosition.Closed,
+            with(density) { -80.dp.toPx() } to SwipePosition.Open
+        )
+    }
+
+    // 删除状态
+    var deleteState by remember { mutableStateOf<DeleteState>(DeleteState.Idle) }
+    val isDeleting = deleteState is DeleteState.Loading
+    val coroutineScope = rememberCoroutineScope()
+
+    // 计算卡片偏移量
+    val deleteCardBgColor = when {
+        isDeleting -> MaterialTheme.colorScheme.error
+        else -> MaterialTheme.colorScheme.onError
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(IntrinsicSize.Min)
+    ) {
+        // 包含删除按钮
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .swipeable(
+                    state = swipeState,
+                    anchors = swipeAnchors,
+                    thresholds = { _, _ -> FractionalThreshold(0.5f) },
+                    orientation = Orientation.Horizontal
+                )
+                .offset { IntOffset(swipeState.offset.value.toInt(), 0) }
+        ) {
+            content()
+
+            // 删除按钮
+            Card(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .width(80.dp)
+                    .align(Alignment.CenterEnd)
+                    .offset(x = 80.dp) // 初始在屏幕外
+                    .clickable(
+                        enabled = deleteEnabled && !isDeleting,
+                        onClick = {
+                            deleteState = DeleteState.Loading
+                            coroutineScope.launch {
+                                try {
+                                    withTimeout(5000) {
+                                        onDelete()
+                                    }
+                                    deleteState = DeleteState.Success
+                                } catch (e: Exception) {
+                                    deleteState = DeleteState.Error(e.message ?: "删除失败")
+                                }
+                            }
+                        }
+                    ),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.onSurface
+                ),
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxSize().background(deleteCardBgColor),
+                    contentAlignment = Alignment.Center
+                ) {
+                    when (val state = deleteState) {
+                        is DeleteState.Idle ->
+                            Text(
+                                text = "删除",
+                                color = MaterialTheme.colorScheme.onSurface,
+                                fontWeight = FontWeight.Bold
+                            )
+
+                        is DeleteState.Loading ->
+                            CircularProgressIndicator(
+                                color = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.size(24.dp),
+                                strokeWidth = 2.dp
+                            )
+
+                        is DeleteState.Success ->
+                            Icon(Icons.Default.Check, "成功", tint = MaterialTheme.colorScheme.onSurface)
+
+                        is DeleteState.Error ->
+                            Icon(Icons.Default.Error, "失败", tint = MaterialTheme.colorScheme.onSurface)
+                    }
+                }
+            }
+        }
+
+        // 处理删除结果
+        LaunchedEffect(deleteState) {
+            when (val state = deleteState) {
+                is DeleteState.Error -> {
+                    Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
+                    delay(1000)
+                    deleteState = DeleteState.Idle
+                }
+                is DeleteState.Success -> {
+                    delay(1000)
+                    deleteState = DeleteState.Idle
+                }
+                else -> {}
+            }
+        }
+    }
+}
+
+// 状态枚举
+private enum class SwipePosition { Open, Closed }
+
+// 删除状态密封类
+private sealed class DeleteState {
+    object Idle : DeleteState()
+    object Loading : DeleteState()
+    object Success : DeleteState()
+    data class Error(val message: String) : DeleteState()
 }

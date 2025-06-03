@@ -3,8 +3,9 @@ package dev.coffee.examapp.ui.components
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.outlined.*
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.rounded.Star
+import androidx.compose.material.icons.rounded.StarOutline
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -16,7 +17,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import dev.coffee.examapp.model.WrongQuestion
-import kotlin.invoke
 
 @Composable
 fun WrongQuestionCard(
@@ -50,7 +50,7 @@ fun WrongQuestionCard(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = question.examTitle,
+                    text = "错题",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,
@@ -61,7 +61,7 @@ fun WrongQuestionCard(
                 // 收藏按钮
                 IconButton(onClick = onToggleBookmark) {
                     Icon(
-                        imageVector = if (question.collected) Icons.Default.Star else Icons.Outlined.Star,
+                        imageVector = if (question.collected) Icons.Rounded.Star else Icons.Rounded.StarOutline,
                         contentDescription = if (question.collected) "已收藏" else "收藏",
                         tint = if (question.collected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
@@ -88,7 +88,7 @@ fun WrongQuestionCard(
                     withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                         append("你的答案：")
                     }
-                    append(question.userAnswer)
+                    append(question.myAnswer)
                 },
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.error

@@ -1,16 +1,15 @@
 package dev.coffee.examapp.ui.screens.exam
 
-import dev.coffee.examapp.R
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.outlined.*
+import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material3.*
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
@@ -21,6 +20,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import dev.coffee.examapp.R
+import dev.coffee.examapp.model.Exam
 import dev.coffee.examapp.model.ExamStatus
 import dev.coffee.examapp.ui.components.ExamCard
 import dev.coffee.examapp.ui.components.LoadingIndicator
@@ -32,8 +33,6 @@ import kotlinx.coroutines.launch
 fun ExamScreen(
     viewModel: ExamViewModel = viewModel()
 ) {
-    // 模拟从ViewModel获取数据
-    val exams by viewModel.exams.collectAsState()
     val scope = rememberCoroutineScope()
     val isLoading by viewModel.isLoading.collectAsState()
     val tabs = listOf(
@@ -44,7 +43,7 @@ fun ExamScreen(
         ),
         TabItem(
             title = stringResource(R.string.tab_completed),
-            icon = Icons.Filled.CheckCircle,
+            icon = Icons.Outlined.CheckCircle,
             status = ExamStatus.COMPLETED
         ),
         TabItem(
@@ -83,7 +82,7 @@ fun ExamScreen(
                         .align(Alignment.CenterHorizontally)
                 )
 
-                // Tab栏 - 使用TabRow实现居中
+                // Tab栏
                 TabRow(
                     selectedTabIndex = pagerState.currentPage,
                     modifier = Modifier.fillMaxWidth(),
@@ -115,6 +114,39 @@ fun ExamScreen(
             }
         }
 
+        /* 测试用 */
+//        val testExams = listOf(
+//            Exam(
+//                id = 1,
+//                name = "数学考试",
+//                startTime = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, 1) }.time, // 明天开始
+//                endTime = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, 2) }.time,   // 后天结束
+//                duration = 90,
+//                status = ExamStatus.PENDING,
+//                questionList = listOf(1,2,3)
+//            ),
+//            Exam(
+//                id = 2,
+//                name = "历史考试",
+//                startTime = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -10) }.time, // 10天前开始
+//                endTime = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -5) }.time,    // 5天前结束
+//                duration = 60,
+//                status = ExamStatus.COMPLETED,
+//                score = 85,
+//                questionList = listOf(2,4,5),
+//            ),
+//            Exam(
+//                id = 3,
+//                name = "物理考试",
+//                startTime = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -20) }.time, // 20天前开始
+//                endTime = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -15) }.time,   // 15天前结束
+//                duration = 120,
+//                status = ExamStatus.EXPIRED,
+//                questionList = listOf(1,3,4)
+//            )
+//        )
+
+
         // 加载状态
         if (isLoading) {
             LoadingIndicator()
@@ -122,6 +154,7 @@ fun ExamScreen(
             // Tab内容
             HorizontalPager(state = pagerState) { page ->
                 val filteredExams = viewModel.filterExamsByStatus(tabs[page].status)
+                // val filteredExams = testExams.filter { it.status == tabs[page].status }  // 测试用
                 ExamList(exams = filteredExams, status = tabs[page].status)
             }
         }
@@ -129,7 +162,7 @@ fun ExamScreen(
 }
 
 @Composable
-fun ExamList(exams: List<dev.coffee.examapp.model.Exam>, status: ExamStatus) {
+fun ExamList(exams: List<Exam>, status: ExamStatus) {
     if (exams.isEmpty()) {
         Box(
             modifier = Modifier

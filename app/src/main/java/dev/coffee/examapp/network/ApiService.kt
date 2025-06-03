@@ -3,8 +3,7 @@ package dev.coffee.examapp.network
 import dev.coffee.examapp.model.Exam
 import dev.coffee.examapp.model.WrongQuestion
 import retrofit2.Response
-import retrofit2.http.GET
-import retrofit2.http.POST
+import retrofit2.http.*
 import retrofit2.http.Header
 import retrofit2.http.Body
 import retrofit2.http.Path
@@ -36,6 +35,12 @@ interface ApiService {
         @Path("id") examId: String,
         @Body answers: Map<String, String>
     ): Response<ExamResult>
+
+    @DELETE("wrong-question/{id}")
+    suspend fun deleteWrongQuestion(
+        @Header("Authorization") token: String,
+        @Path("id") questionId: Int
+    ): Response<Unit>
 }
 
 data class ExamResult(

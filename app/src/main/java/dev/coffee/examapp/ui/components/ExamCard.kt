@@ -46,7 +46,7 @@ fun ExamCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = exam.title,
+                    text = exam.name,
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,
@@ -90,7 +90,6 @@ fun ExamCard(
             Spacer(modifier = Modifier.height(12.dp))
 
             // 考试信息
-            ExamInfoItem(label = "科目：", value = exam.subject)
             ExamInfoItem(label = "时间：", value = exam.formattedTime)
             ExamInfoItem(label = "时长：", value = "${exam.duration}分钟")
 
@@ -98,8 +97,8 @@ fun ExamCard(
                 Spacer(modifier = Modifier.height(8.dp))
                 ExamInfoItem(
                     label = "成绩：",
-                    value = "${exam.score}/${exam.totalQuestions}",
-                    valueColor = if (exam.passed == true) SuccessColor else ErrorColor
+                    value = "${exam.score}",
+                    valueColor = exam.score?.let { if (it >= 60) SuccessColor else ErrorColor }
                 )
             }
 

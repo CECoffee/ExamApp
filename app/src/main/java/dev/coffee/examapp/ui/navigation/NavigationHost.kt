@@ -10,8 +10,10 @@ import androidx.navigation.navArgument
 import dev.coffee.examapp.ui.screens.exam.ExamListScreen
 import dev.coffee.examapp.ui.screens.exam.ExamResultScreen
 import dev.coffee.examapp.ui.screens.exam.ExamScreen
+import dev.coffee.examapp.ui.screens.practice.PracticeListScreen
 import dev.coffee.examapp.ui.screens.practice.PracticeScreen
 import dev.coffee.examapp.ui.screens.wrongQuestion.WrongQuestionScreen
+import java.net.URLDecoder
 
 @Composable
 fun NavigationHost(navController: NavHostController,
@@ -22,7 +24,7 @@ fun NavigationHost(navController: NavHostController,
         modifier = modifier
     ) {
         composable(Screen.Practice.route) {
-            PracticeScreen(navController)
+            PracticeListScreen(navController)
         }
         composable(Screen.ExamList.route) {
             ExamListScreen(navController)
@@ -60,5 +62,23 @@ fun NavigationHost(navController: NavHostController,
                 onBack = { navController.popBackStack() }
             )
         }
+
+        // In your navigation graph:
+        composable("practice/{chapterId}/{chapterName}") { backStackEntry ->
+            val chapterId = backStackEntry.arguments?.getString("chapterId")?.toIntOrNull() ?: 0
+            val chapterName = URLDecoder.decode(
+                backStackEntry.arguments?.getString("chapterName") ?: "",
+                "utf-8"
+            )
+            PracticeScreen(
+                chapterId = chapterId,
+                chapterName = chapterName,
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+
+
     }
 }
+

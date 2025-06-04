@@ -31,7 +31,6 @@ class PracticeListViewModel : ViewModel() {
             _errorMessage.value = null
 
             try {
-                // :
                 // TODO: Replace with actual API call
                 // val response = apiService.getPractices()
                 // if (response.isSuccessful) {

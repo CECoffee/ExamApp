@@ -79,6 +79,7 @@ dependencies {
 
     // 分页
     implementation ("androidx.paging:paging-compose:3.3.6")
+    implementation("androidx.compose.foundation:foundation-android:1.7.4")
 
     // 测试依赖
     testImplementation ("junit:junit:4.13.2")

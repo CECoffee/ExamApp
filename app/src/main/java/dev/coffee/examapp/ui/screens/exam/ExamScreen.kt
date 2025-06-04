@@ -1,202 +1,402 @@
 package dev.coffee.examapp.ui.screens.exam
 
-import androidx.compose.foundation.ExperimentalFoundationApi
+import android.widget.Toast
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.Schedule
-import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
-import dev.coffee.examapp.R
-import dev.coffee.examapp.model.Exam
-import dev.coffee.examapp.model.ExamStatus
-import dev.coffee.examapp.ui.components.ExamCard
-import dev.coffee.examapp.ui.components.LoadingIndicator
+import dev.coffee.examapp.model.Question
+import dev.coffee.examapp.ui.theme.SuccessColor
 import dev.coffee.examapp.viewmodel.ExamViewModel
-import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ExamScreen(
-    viewModel: ExamViewModel = viewModel()
+    examId: Int,
+    duration: Int,
+    questionIdStrings: String,
+    onBack: () -> Unit
 ) {
-    val scope = rememberCoroutineScope()
-    val isLoading by viewModel.isLoading.collectAsState()
-    val tabs = listOf(
-        TabItem(
-            title = stringResource(R.string.tab_pending),
-            icon = Icons.Filled.Schedule,
-            status = ExamStatus.PENDING
-        ),
-        TabItem(
-            title = stringResource(R.string.tab_completed),
-            icon = Icons.Outlined.CheckCircle,
-            status = ExamStatus.COMPLETED
-        ),
-        TabItem(
-            title = stringResource(R.string.tab_expired),
-            icon = Icons.Filled.History,
-            status = ExamStatus.EXPIRED
-        )
+    val questionIds = remember(questionIdStrings) {
+        questionIdStrings.split(",").map { it.toInt() }
+    }
+    val context = LocalContext.current
+    val viewModel: ExamViewModel = viewModel(
+        factory = object : androidx.lifecycle.ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return ExamViewModel(examId, duration, questionIds) as T
+            }
+        }
     )
 
-    val pagerState = rememberPagerState { tabs.size }
-
-    // 初始化加载数据
-    LaunchedEffect(Unit) {
-        // TODO 传递真实的token
-        viewModel.loadExams("fake_token")
+    // 处理Toast显示
+    val toastMessage by viewModel.showToast.collectAsState()
+    LaunchedEffect(toastMessage) {
+        toastMessage?.let {
+            Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+            viewModel.clearToast()
+        }
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        Surface(
-            color = MaterialTheme.colorScheme.surfaceVariant,
-            modifier = Modifier.fillMaxWidth()
+    val currentQuestion by viewModel.currentQuestion.collectAsState()
+    val currentIndex by viewModel.currentQuestionIndex.collectAsState()
+    val remainingTime by viewModel.remainingTime.collectAsState()
+    val score by viewModel.score.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+    val examFinished by viewModel.examFinished.collectAsState()
+
+    // 处理中途返回
+    var showExitConfirmation by remember { mutableStateOf(false) }
+    BackHandler(enabled = true) {
+        // 如果考试已经结束，直接返回
+        if (examFinished) {
+            onBack()
+        } else {
+            showExitConfirmation = true
+        }
+    }
+
+    if (showExitConfirmation) {
+        AlertDialog(
+            onDismissRequest = { showExitConfirmation = false },
+            title = { Text("退出考试") },
+            text = { Text("中途退出将直接提交成绩，确定退出吗？") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showExitConfirmation = false
+                        viewModel.finishExam()
+                        onBack()
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary
+                    )
+                ) {
+                    Text("确定")
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = { showExitConfirmation = false },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+                    )
+                ) {
+                    Text(text = "取消", color = MaterialTheme.colorScheme.onSurface)
+                }
+            }
+        )
+    }
+
+    // 考试结束处理
+    if (examFinished) {
+        ExamResultScreen(scoreString = score.toString(), onBack = onBack)
+        return
+    }
+
+    // 主界面
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFFF5F7FA))
+    ) {
+        // 顶部信息栏
+        ExamHeader(
+            remainingTime = remainingTime,
+            currentIndex = currentIndex,
+            totalQuestions = questionIds.size,
+            score = score
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // 题目内容区域
+        QuestionContent(
+            question = currentQuestion,
+            isLoading = isLoading,
+            onAnswerChanged = { viewModel.updateAnswer(it) }
+        )
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        // 导航按钮
+        NavigationButtons(
+            currentIndex = currentIndex,
+            totalQuestions = questionIds.size,
+            isLoading = isLoading,
+            onPrevious = { viewModel.navigateToPrevious(context) },
+            onNext = { viewModel.navigateToNext(context) },
+            onSubmit = { viewModel.finishExam() }
+        )
+    }
+}
+
+@Composable
+fun ExamHeader(
+    remainingTime: Int,
+    currentIndex: Int,
+    totalQuestions: Int,
+    score: Double
+) {
+    val minutes = remainingTime / 60
+    val seconds = remainingTime % 60
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .padding(16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // 计时器
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                text = "剩余时间",
+                color = MaterialTheme.colorScheme.onSurface,
+                fontSize = 14.sp
+            )
+            Text(
+                text = String.format("%02d:%02d", minutes, seconds),
+                color = if (remainingTime < 60) Color(0xFFFF7043) else MaterialTheme.colorScheme.onSurface,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+
+        // 进度
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                text = "题目进度",
+                color = MaterialTheme.colorScheme.onSurface,
+                fontSize = 14.sp
+            )
+            Text(
+                text = "${currentIndex + 1}/$totalQuestions",
+                color = MaterialTheme.colorScheme.onSurface,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+
+        // 当前得分
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                text = "当前得分",
+                color = MaterialTheme.colorScheme.onSurface,
+                fontSize = 14.sp
+            )
+            Text(
+                text = "${score.toInt()}分",
+                color = MaterialTheme.colorScheme.onSurface,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
+}
+
+@Composable
+fun QuestionContent(
+    question: Question?,
+    isLoading: Boolean,
+    onAnswerChanged: (String) -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        elevation = CardDefaults.cardElevation(4.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp)
+            // 难度指示器
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
             ) {
-                // 标题
-                Text(
-                    text = stringResource(R.string.exam_title),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary,
+                val difficultyText = when (question?.difficulty) {
+                    1 -> "简单"
+                    2 -> "中等"
+                    3 -> "困难"
+                    else -> ""
+                }
+                val difficultyColor = when (question?.difficulty) {
+                    1 -> Color(0xFF4CAF50)
+                    2 -> Color(0xFFFFC107)
+                    3 -> Color(0xFFF44336)
+                    else -> Color.Gray
+                }
+
+                if (difficultyText.isNotEmpty()) {
+                    Text(
+                        text = difficultyText,
+                        color = difficultyColor,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier
+                            .padding(4.dp)
+                            .border(1.dp, difficultyColor, RoundedCornerShape(4.dp))
+                            .padding(horizontal = 8.dp, vertical = 2.dp)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            if (isLoading) {
+                Box(
                     modifier = Modifier
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                        .align(Alignment.CenterHorizontally)
+                        .fillMaxWidth()
+                        .height(200.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            } else if (question != null) {
+                // 题目内容
+                Text(
+                    text = question.content,
+                    fontSize = 18.sp,
+                    modifier = Modifier.padding(bottom = 24.dp)
                 )
 
-                // Tab栏
-                TabRow(
-                    selectedTabIndex = pagerState.currentPage,
-                    modifier = Modifier.fillMaxWidth(),
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    indicator = { tabPositions ->
-                        TabRowDefaults.SecondaryIndicator(
-                            modifier = Modifier.tabIndicatorOffset(tabPositions[pagerState.currentPage]),
-                            height = 3.dp,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    },
-                    divider = {}
-                ) {
-                    tabs.forEachIndexed { index, tab ->
-                        Tab(
-                            selected = pagerState.currentPage == index,
-                            onClick = {
-                                scope.launch {
-                                    pagerState.animateScrollToPage(index)
-                                }
-                            },
-                            text = { Text(tab.title) },
-                            icon = { Icon(tab.icon, contentDescription = tab.title) },
-                            selectedContentColor = MaterialTheme.colorScheme.primary,
-                            unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
+                // 答案输入区域
+                Text(
+                    text = "你的答案：",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF3F51B5),
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                TextField(
+                    value = question.myAnswer ?: "",
+                    onValueChange = onAnswerChanged,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(150.dp),
+                    placeholder = { Text("在此输入答案") },
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        disabledContainerColor = Color.Transparent,
+                        focusedIndicatorColor = Color(0xFF3F51B5),
+                        unfocusedIndicatorColor = Color(0xFFBDBDBD),
+                    )
+                )
+            } else {
+                Text(
+                    text = "无法加载题目",
+                    fontSize = 18.sp,
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp),
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun NavigationButtons(
+    currentIndex: Int,
+    totalQuestions: Int,
+    isLoading: Boolean,
+    onPrevious: () -> Unit,
+    onNext: () -> Unit,
+    onSubmit: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Button(
+            onClick = onPrevious,
+            enabled = currentIndex > 0 && !isLoading,
+            modifier = Modifier.width(120.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant
+            )
+        ) {
+            if (isLoading && currentIndex > 0) {
+                CircularProgressIndicator(
+                    color = Color.White,
+                    modifier = Modifier.size(20.dp)
+                )
+            } else {
+                Text(
+                    text = "上一题",
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+        }
+
+        if (currentIndex == totalQuestions - 1) {
+            Button(
+                onClick = onSubmit,
+                enabled = !isLoading,
+                modifier = Modifier.width(120.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = SuccessColor.copy(0.4f)
+                )
+            ) {
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        color = Color.White,
+                        modifier = Modifier.size(20.dp)
+                    )
+                } else {
+                    Text(
+                        text = "提交",
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
+        } else {
+            Button(
+                onClick = onNext,
+                enabled = !isLoading,
+                modifier = Modifier.width(120.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                )
+            ) {
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        color = Color.White,
+                        modifier = Modifier.size(20.dp)
+                    )
+                } else {
+                    Text(
+                        text = "下一题",
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
                 }
             }
         }
-
-        /* 测试用 */
-//        val testExams = listOf(
-//            Exam(
-//                id = 1,
-//                name = "数学考试",
-//                startTime = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, 1) }.time, // 明天开始
-//                endTime = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, 2) }.time,   // 后天结束
-//                duration = 90,
-//                status = ExamStatus.PENDING,
-//                questionList = listOf(1,2,3)
-//            ),
-//            Exam(
-//                id = 2,
-//                name = "历史考试",
-//                startTime = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -10) }.time, // 10天前开始
-//                endTime = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -5) }.time,    // 5天前结束
-//                duration = 60,
-//                status = ExamStatus.COMPLETED,
-//                score = 85,
-//                questionList = listOf(2,4,5),
-//            ),
-//            Exam(
-//                id = 3,
-//                name = "物理考试",
-//                startTime = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -20) }.time, // 20天前开始
-//                endTime = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -15) }.time,   // 15天前结束
-//                duration = 120,
-//                status = ExamStatus.EXPIRED,
-//                questionList = listOf(1,3,4)
-//            )
-//        )
-
-
-        // 加载状态
-        if (isLoading) {
-            LoadingIndicator()
-        } else {
-            // Tab内容
-            HorizontalPager(state = pagerState) { page ->
-                val filteredExams = viewModel.filterExamsByStatus(tabs[page].status)
-                // val filteredExams = testExams.filter { it.status == tabs[page].status }  // 测试用
-                ExamList(exams = filteredExams, status = tabs[page].status)
-            }
-        }
     }
 }
-
-@Composable
-fun ExamList(exams: List<Exam>, status: ExamStatus) {
-    if (exams.isEmpty()) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = when (status) {
-                    ExamStatus.PENDING -> "没有待考考试"
-                    ExamStatus.COMPLETED -> "没有已完成的考试"
-                    ExamStatus.EXPIRED -> "没有已过期的考试"
-                },
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-            )
-        }
-    } else {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            exams.forEach { exam ->
-                ExamCard(
-                    exam = exam,
-                    onStartExam = { /* 处理开始考试逻辑 */ },
-                    onViewResult = { /* 处理查看成绩逻辑 */ }
-                )
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-        }
-    }
-}
-
-data class TabItem(val title: String, val icon: ImageVector, val status: ExamStatus)

@@ -6,10 +6,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavDestination
-import androidx.navigation.NavDestination.Companion.hierarchy
-import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import dev.coffee.examapp.ui.components.BottomNavigationBar
@@ -22,15 +18,21 @@ fun MainScreen() {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
 
-    val items = listOf(Screen.Exam, Screen.WrongQuestion)
+    val bottomBarItems = listOf(Screen.Practice, Screen.ExamList, Screen.WrongQuestion)
+    val hideBottomBarItems = listOf(Screen.Exam.route + "/")
+    val shouldShowBottomBar = hideBottomBarItems.none { baseRoute ->
+        currentDestination?.route?.startsWith(baseRoute) == true
+    }
 
     Scaffold(
         bottomBar = {
-            BottomNavigationBar(
-                navController = navController,
-                currentDestination = currentDestination,
-                items = items
-            )
+            if (shouldShowBottomBar) {
+                BottomNavigationBar(
+                    navController = navController,
+                    currentDestination = currentDestination,
+                    items = bottomBarItems
+                )
+            }
         }
     ) { innerPadding ->
         NavigationHost(

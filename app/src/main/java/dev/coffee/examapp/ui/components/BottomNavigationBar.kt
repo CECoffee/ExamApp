@@ -69,7 +69,7 @@ fun BottomNavigationBar(
                     if (selected) {
                         Text(
                             screen.title,
-                            fontSize = 12.sp, // 稍小字号
+                            fontSize = 12.sp,
                             maxLines = 1
                         )
                     }
@@ -87,9 +87,9 @@ fun BottomNavigationBar(
                 colors = NavigationBarItemDefaults.colors(
                     selectedIconColor = MaterialTheme.colorScheme.primary,
                     selectedTextColor = MaterialTheme.colorScheme.primary,
-                    indicatorColor = Color.Transparent, // 禁用默认指示器
+                    indicatorColor = Color.Transparent,
                     unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                    unselectedTextColor = Color.Transparent // 确保未选中文字透明
+                    unselectedTextColor = Color.Transparent
                 )
             )
         }

@@ -1,4 +1,4 @@
-package dev.coffee.examapp.ui.screens.wrong
+package dev.coffee.examapp.ui.screens.wrongQuestion
 
 import android.annotation.SuppressLint
 import android.widget.Toast
@@ -15,13 +15,13 @@ import androidx.compose.material.FractionalThreshold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.RemoveCircle
 import androidx.compose.material.rememberSwipeableState
 import androidx.compose.material.swipeable
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,9 +36,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import dev.coffee.examapp.model.WrongQuestion
 import dev.coffee.examapp.ui.components.LoadingIndicator
 import dev.coffee.examapp.ui.components.WrongQuestionCard
+import dev.coffee.examapp.ui.theme.ErrorColor
 import dev.coffee.examapp.viewmodel.WrongQuestionViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -46,6 +48,7 @@ import kotlinx.coroutines.withTimeout
 
 @Composable
 fun WrongQuestionScreen(
+    navController: NavController,
     viewModel: WrongQuestionViewModel = viewModel()
 ) {
     // 从ViewModel获取数据
@@ -53,24 +56,18 @@ fun WrongQuestionScreen(
     val isLoading by viewModel.isLoading.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
 
-    // TODO 传递真实token
-    val token = "fake_token"
-
     // 初始化加载数据
     LaunchedEffect(Unit) {
-
         // 用于测试的wrongQuestion实例
 //        val testWrongQuestion = WrongQuestion(
 //            questionId = 1,
 //            content = "这是测试题目内容",
 //            myAnswer = "B",
-//            correctAnswer = "A",
-//            collected = false
+//            correctAnswer = "A"
 //        )
 //         viewModel.wrongQuestions.value = listOf(testWrongQuestion)
 
-
-        viewModel.refresh(token)
+        viewModel.refresh()
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -122,13 +119,12 @@ fun WrongQuestionScreen(
                     key = { it.questionId }
                 ) { question ->
                     SwipeToDeleteContainer(
-                        onDelete = { viewModel.deleteWrongQuestion(token, question.questionId) },
+                        onDelete = { viewModel.deleteWrongQuestion(question.questionId) },
                         deleteEnabled = true
                     ) {
                         WrongQuestionCard(
                             question = question,
-                            onViewExplanation = { /* TODO */ },
-                            onToggleBookmark = { /* TODO */ }
+                            onViewExplanation = { /* TODO */ }
                         )
     }
                 }
@@ -149,7 +145,7 @@ fun WrongQuestionScreen(
                         }
                     } else if (wrongQuestions.isNotEmpty()) {
                         Button(
-                            onClick = { viewModel.loadNextPage(token) },
+                            onClick = { viewModel.loadNextPage() },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp, vertical = 8.dp),
@@ -170,7 +166,7 @@ fun WrongQuestionScreen(
 
 // 滑动删除容器组件
 @SuppressLint("UnrememberedMutableState")
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun SwipeToDeleteContainer(
     onDelete: suspend () -> Unit,
@@ -185,7 +181,7 @@ fun SwipeToDeleteContainer(
     val swipeAnchors = remember(density) {
         mapOf(
             0f to SwipePosition.Closed,
-            with(density) { -80.dp.toPx() } to SwipePosition.Open
+            with(density) { -88.dp.toPx() } to SwipePosition.Open
         )
     }
 
@@ -196,8 +192,8 @@ fun SwipeToDeleteContainer(
 
     // 计算卡片偏移量
     val deleteCardBgColor = when {
-        isDeleting -> MaterialTheme.colorScheme.error
-        else -> MaterialTheme.colorScheme.onError
+        isDeleting -> ErrorColor.copy(0.3f)
+        else -> ErrorColor.copy(0.8f)
     }
 
     Box(
@@ -225,6 +221,7 @@ fun SwipeToDeleteContainer(
                     .fillMaxHeight()
                     .width(80.dp)
                     .align(Alignment.CenterEnd)
+                    .padding(vertical = 8.dp)
                     .offset(x = 80.dp) // 初始在屏幕外
                     .clickable(
                         enabled = deleteEnabled && !isDeleting,
@@ -253,11 +250,7 @@ fun SwipeToDeleteContainer(
                 ) {
                     when (val state = deleteState) {
                         is DeleteState.Idle ->
-                            Text(
-                                text = "删除",
-                                color = MaterialTheme.colorScheme.onSurface,
-                                fontWeight = FontWeight.Bold
-                            )
+                            Icon(Icons.Filled.RemoveCircle, "删除")
 
                         is DeleteState.Loading ->
                             CircularProgressIndicator(
@@ -266,11 +259,10 @@ fun SwipeToDeleteContainer(
                                 strokeWidth = 2.dp
                             )
 
-                        is DeleteState.Success ->
-                            Icon(Icons.Default.Check, "成功", tint = MaterialTheme.colorScheme.onSurface)
-
                         is DeleteState.Error ->
-                            Icon(Icons.Default.Error, "失败", tint = MaterialTheme.colorScheme.onSurface)
+                            Icon(Icons.Default.Error, "失败")
+
+                        is DeleteState.Success -> TODO()
                     }
                 }
             }
@@ -281,11 +273,11 @@ fun SwipeToDeleteContainer(
             when (val state = deleteState) {
                 is DeleteState.Error -> {
                     Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
-                    delay(1000)
+                    delay(2000)
                     deleteState = DeleteState.Idle
                 }
                 is DeleteState.Success -> {
-                    delay(1000)
+                    onDelete()
                     deleteState = DeleteState.Idle
                 }
                 else -> {}

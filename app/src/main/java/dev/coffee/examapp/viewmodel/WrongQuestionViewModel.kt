@@ -37,13 +37,13 @@ class WrongQuestionViewModel : ViewModel() {
 
     val deleteState = mutableStateOf<DeleteState>(DeleteState.Idle)
 
-    fun loadWrongQuestions(token: String, page: Int = 1) {
+    fun loadWrongQuestions(page: Int = 1) {
         viewModelScope.launch {
             _isLoading.value = true
             _errorMessage.value = null
 
             try {
-                val response = apiService.getWrongQuestions(token, page, 10)
+                val response = apiService.getWrongQuestions(page, 10)
                 if (response.isSuccessful) {
                     val newQuestions = response.body() ?: emptyList()
 
@@ -66,23 +66,22 @@ class WrongQuestionViewModel : ViewModel() {
         }
     }
 
-    fun refresh(token: String) {
-        loadWrongQuestions(token, 1)
+    fun refresh() {
+        loadWrongQuestions(1)
     }
 
-    fun loadNextPage(token: String) {
+    fun loadNextPage() {
         if (!isLoading.value && hasMore.value) {
-            loadWrongQuestions(token, currentPage.value + 1)
+            loadWrongQuestions(currentPage.value + 1)
         }
     }
 
-    suspend fun deleteWrongQuestion(token: String, id: Int) {
+    suspend fun deleteWrongQuestion(id: Int) {
         try {
             deleteState.value = DeleteState.Loading
-            // 实际网络请求
-            apiService.deleteWrongQuestion(token, questionId = id)
+            apiService.deleteWrongQuestion(questionId = id)
             deleteState.value = DeleteState.Success
-            refresh(token) // 刷新数据
+            refresh()
         } catch (e: Exception) {
             deleteState.value = DeleteState.Error(e.message ?: "删除失败")
         }

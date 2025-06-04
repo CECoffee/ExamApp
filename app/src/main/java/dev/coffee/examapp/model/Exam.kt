@@ -9,7 +9,7 @@ data class Exam(
     val endTime: Date,
     val duration: Int, // 秒
     val status: ExamStatus,
-    val score: Int? = null,
+    val score: Double? = null,
     val questionList: List<Int>,
 ) {
     val formattedTime: String

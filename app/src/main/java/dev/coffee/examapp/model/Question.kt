@@ -1,8 +1,7 @@
 package dev.coffee.examapp.model
 
-data class Questions (
+data class Question (
     val id: Int,
-    val scoreValue: Double,
     val difficulty: Int,
     val content: String,
     val questionType: QuestionType,

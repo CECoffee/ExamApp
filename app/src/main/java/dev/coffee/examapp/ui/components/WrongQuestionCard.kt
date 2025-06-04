@@ -22,7 +22,6 @@ import dev.coffee.examapp.model.WrongQuestion
 fun WrongQuestionCard(
     question: WrongQuestion,
     onViewExplanation: () -> Unit = {},
-    onToggleBookmark: () -> Unit = {}
 ) {
     Card(
         modifier = Modifier
@@ -38,38 +37,6 @@ fun WrongQuestionCard(
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Menu,
-                    contentDescription = "错题",
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(20.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "错题",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f)
-                )
-
-                // 收藏按钮
-                IconButton(onClick = onToggleBookmark) {
-                    Icon(
-                        imageVector = if (question.collected) Icons.Rounded.Star else Icons.Rounded.StarOutline,
-                        contentDescription = if (question.collected) "已收藏" else "收藏",
-                        tint = if (question.collected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
             // 题目内容
             Text(
                 text = buildAnnotatedString {

@@ -1,6 +1,7 @@
 package dev.coffee.examapp.network
 
 import dev.coffee.examapp.model.Exam
+import dev.coffee.examapp.model.Question
 import dev.coffee.examapp.model.WrongQuestion
 import retrofit2.Response
 import retrofit2.http.*
@@ -10,41 +11,34 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface ApiService {
+
+    @GET("/question/{id}")
+    suspend fun getQuestion(@Path("id") id: Int): Response<Question>
+
+    @POST("/question/{id}/submit")
+    suspend fun submitAnswer(
+        @Path("id") id: Int,
+        @Body answer: String
+    ): Response<Unit>
+
     @GET("exams")
-    suspend fun getExams(
-        @Header("Authorization") token: String,
-        @Query("status") status: String? = null
-    ): Response<List<Exam>>
+    suspend fun getExams( @Query("status") status: String? = null ): Response<List<Exam>>
+
+    @GET("exams/{id}/start")
+    suspend fun startExam( @Path("id") examId: String ): Response<Unit>
+
+    @POST("exams/{id}/submit")
+    suspend fun submitExam(
+        @Path("id") examId: Int,
+        @Body score: Double
+    ): Response<Unit>
 
     @GET("wrong-questions")
     suspend fun getWrongQuestions(
-        @Header("Authorization") token: String,
         @Query("page") page: Int = 1,
         @Query("limit") limit: Int = 10
     ): Response<List<WrongQuestion>>
 
-    @GET("exams/{id}/start")
-    suspend fun startExam(
-        @Header("Authorization") token: String,
-        @Path("id") examId: String
-    ): Response<Unit>
-
-    @POST("exams/{id}/submit")
-    suspend fun submitExam(
-        @Header("Authorization") token: String,
-        @Path("id") examId: String,
-        @Body answers: Map<String, String>
-    ): Response<ExamResult>
-
     @DELETE("wrong-question/{id}")
-    suspend fun deleteWrongQuestion(
-        @Header("Authorization") token: String,
-        @Path("id") questionId: Int
-    ): Response<Unit>
+    suspend fun deleteWrongQuestion( @Path("id") questionId: Int ): Response<Unit>
 }
-
-data class ExamResult(
-    val score: Int,
-    val total: Int,
-    val passed: Boolean
-)

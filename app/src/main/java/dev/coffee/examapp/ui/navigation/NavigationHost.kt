@@ -70,6 +70,7 @@ fun NavigationHost(navController: NavHostController,
                 backStackEntry.arguments?.getString("chapterName") ?: "",
                 "utf-8"
             )
+
             PracticeScreen(
                 chapterId = chapterId,
                 chapterName = chapterName,

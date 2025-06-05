@@ -43,12 +43,9 @@ interface ApiService {
     @GET("practices")
     suspend fun getPractices(): Response<List<Practice>>
 
-    @GET("practice-question/{chap_id}")
-    suspend fun getPracticeQuestion(@Path("chap_id") chapterId: Int): Response<Question>
-
     @POST("practice-question/{chap_id}")
     suspend fun submitPracticeAnswer(
         @Path("chap_id") chapterId : Int,
-        @Body answer: String, isCorrect: Boolean
-    ): Response<Unit>
+        @Body answer: String? = null, isCorrect: Boolean? =null
+    ): Response<Question>
 }

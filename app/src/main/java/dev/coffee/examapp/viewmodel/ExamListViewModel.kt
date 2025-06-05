@@ -15,7 +15,6 @@ class ExamListViewModel : ViewModel() {
     private val apiService: ApiService = RetrofitClient.instance
 
     private val _exams = MutableStateFlow<List<Exam>>(emptyList())
-    val exams: StateFlow<List<Exam>> = _exams.asStateFlow()
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
@@ -36,7 +35,7 @@ class ExamListViewModel : ViewModel() {
                     _errorMessage.value = "加载考试列表失败: ${response.code()}"
                 }
             } catch (e: Exception) {
-                _errorMessage.value = "网络错误: ${e.message}"
+                _errorMessage.value = "错误: ${e.message}"
             } finally {
                 _isLoading.value = false
             }
@@ -44,6 +43,6 @@ class ExamListViewModel : ViewModel() {
     }
 
     fun filterExamsByStatus(status: ExamStatus): List<Exam> {
-        return exams.value.filter { it.status == status }
+        return _exams.value.filter { it.status == status }
     }
 }

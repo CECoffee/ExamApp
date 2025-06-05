@@ -12,10 +12,10 @@ import retrofit2.http.Query
 
 interface ApiService {
 
-    @GET("/question/{id}")
+    @GET("question/{id}")
     suspend fun getQuestion(@Path("id") id: Int): Response<Question>
 
-    @POST("/question/{id}/submit")
+    @POST("question/{id}/submit")
     suspend fun submitAnswer(
         @Path("id") id: Int,
         @Body answer: String
@@ -23,9 +23,6 @@ interface ApiService {
 
     @GET("exams")
     suspend fun getExams( @Query("status") status: String? = null ): Response<List<Exam>>
-
-    @GET("exams/{id}/start")
-    suspend fun startExam( @Path("id") examId: String ): Response<Unit>
 
     @POST("exams/{id}/submit")
     suspend fun submitExam(
@@ -39,6 +36,6 @@ interface ApiService {
         @Query("limit") limit: Int = 10
     ): Response<List<WrongQuestion>>
 
-    @DELETE("wrong-question/{id}")
+    @DELETE("wrong-questions/{id}")
     suspend fun deleteWrongQuestion( @Path("id") questionId: Int ): Response<Unit>
 }

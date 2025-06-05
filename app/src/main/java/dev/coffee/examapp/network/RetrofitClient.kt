@@ -8,10 +8,10 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
-    private const val BASE_URL = "https://api.examsystem.com/v1/"
+    private const val BASE_URL = "http://192.168.1.14:8080/"
 
     private val gson = GsonBuilder()
-        .setDateFormat("yyyy-MM-dd'T'HH:mm:ss")
+        .setDateFormat("yyyy-MM-dd HH:mm:ss")
         .create()
 
     private val loggingInterceptor = HttpLoggingInterceptor().apply {

@@ -9,9 +9,9 @@ data class Question(
     val correctAnswer: String,
     val myAnswer: String? = null,
     val explanation: String? = null,
-    val isCorrect: Boolean
+    val isCorrect: Boolean? = null
 )
 
 enum class QuestionType {
-    SINGLE_CHOICE, MULTIPLE_CHOICE, TRUE_FALSE, SHORT_ANSWER, FILL_IN_THE_BLANK
+    SINGLE_CHOICE, MULTIPLE_CHOICE, TRUE_FALSE, FILL_IN_THE_BLANK, SHORT_ANSWER
 }

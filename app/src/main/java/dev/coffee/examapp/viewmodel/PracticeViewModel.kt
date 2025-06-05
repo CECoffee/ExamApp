@@ -22,6 +22,8 @@ class PracticeViewModel(
     private val _currentQuestion = MutableStateFlow<Question?>(null)
     val currentQuestion: StateFlow<Question?> = _currentQuestion.asStateFlow()
 
+    private val _nextQuestion = MutableStateFlow<Question?>(null)
+
     private val _currentQuestionIndex = MutableStateFlow(0)
     val currentQuestionIndex: StateFlow<Int> = _currentQuestionIndex.asStateFlow()
 
@@ -62,27 +64,7 @@ class PracticeViewModel(
         _userAnswer.value = ""
         _showExplanation.value = false
 
-        viewModelScope.launch {
-            try {
-
-                 val response = apiService.getPracticeQuestion(chapterId)
-                 if (response.isSuccessful) {
-                     _currentQuestion.value = response.body()
-                 } else {
-                     _showToast.value = "加载题目失败: ${response.code()}"
-                 }
-
-                // TEST
-//                _currentQuestion.value = mockQuestion(
-//                    id = _currentQuestionIndex.value + 1,
-//                    chapterId = chapterId
-//                )
-            } catch (e: Exception) {
-                _showToast.value = "网络错误: ${e.message}"
-            } finally {
-                _isLoading.value = false
-            }
-        }
+        _currentQuestion.value = _nextQuestion.value
     }
 
     fun updateUserAnswer(answer: String) {
@@ -102,6 +84,7 @@ class PracticeViewModel(
 
                  val response = apiService.submitPracticeAnswer(
                      chapterId = chapterId,
+                     questionId = _currentQuestion.value?.id,
                      answer = _userAnswer.value,
                      isCorrect = _isCorrect.value
                  )
@@ -112,6 +95,8 @@ class PracticeViewModel(
                      }
                      _currentQuestion.value = _currentQuestion.value?.copy(isCorrect = _isCorrect.value)
                      _showExplanation.value = true
+
+                     _nextQuestion.value = response.body()
                  } else {
                      _showToast.value = "提交答案失败: ${response.code()}"
                  }

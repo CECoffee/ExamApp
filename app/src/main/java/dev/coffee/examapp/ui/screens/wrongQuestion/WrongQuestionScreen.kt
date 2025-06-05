@@ -248,7 +248,7 @@ fun SwipeToDeleteContainer(
                     modifier = Modifier.fillMaxSize().background(deleteCardBgColor),
                     contentAlignment = Alignment.Center
                 ) {
-                    when (val state = deleteState) {
+                    when (deleteState) {
                         is DeleteState.Idle ->
                             Icon(Icons.Filled.RemoveCircle, "删除")
 

@@ -6,7 +6,6 @@ import dev.coffee.examapp.model.Question
 import dev.coffee.examapp.model.WrongQuestion
 import retrofit2.Response
 import retrofit2.http.*
-import retrofit2.http.Header
 import retrofit2.http.Body
 import retrofit2.http.Path
 import retrofit2.http.Query
@@ -17,7 +16,7 @@ interface ApiService {
     suspend fun getQuestion(@Path("id") id: Int): Response<Question>
 
     @POST("question/{id}/submit")
-    suspend fun submitAnswer(
+    suspend fun submitExamAnswer(
         @Path("id") id: Int,
         @Body answer: String, isCorrect: Boolean
     ): Response<Unit>
@@ -43,12 +42,9 @@ interface ApiService {
     @GET("practices")
     suspend fun getPractices(): Response<List<Practice>>
 
-    @GET("practice-question/{chap_id}")
-    suspend fun getPracticeQuestion(@Path("chap_id") chapterId: Int): Response<Question>
-
     @POST("practice-question/{chap_id}")
     suspend fun submitPracticeAnswer(
         @Path("chap_id") chapterId : Int,
-        @Body answer: String, isCorrect: Boolean
-    ): Response<Unit>
+        @Body questionId: Int? = null, answer: String? = null, isCorrect: Boolean? =null
+    ): Response<Question>
 }

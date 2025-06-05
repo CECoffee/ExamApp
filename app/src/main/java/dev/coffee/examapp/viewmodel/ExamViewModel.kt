@@ -1,11 +1,9 @@
 package dev.coffee.examapp.viewmodel
 
 import android.content.Context
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.coffee.examapp.model.Question
-import dev.coffee.examapp.model.QuestionType
 import dev.coffee.examapp.network.ApiService
 import dev.coffee.examapp.network.RetrofitClient
 import kotlinx.coroutines.delay
@@ -146,7 +144,7 @@ class ExamViewModel(
         currentQuestion.value?.let { question ->
             _userAnswer.value.let { answer ->
                 try {
-                    apiService.submitAnswer(question.id, answer, _isCorrect.value)
+                    apiService.submitExamAnswer(question.id, answer, _isCorrect.value)
                 } catch (e: Exception) {
                     _showToast.value = "答案提交失败: ${e.message}"
                     throw e // 重新抛出异常以阻止导航

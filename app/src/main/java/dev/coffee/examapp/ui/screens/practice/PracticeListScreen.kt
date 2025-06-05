@@ -154,7 +154,11 @@ fun PracticeListScreen(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                Text("暂无练习内容", style = MaterialTheme.typography.bodyLarge)
+                Text(
+                    text = "暂无练习内容",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface.copy(0.6f)
+                )
             }
         } else {
             // Chapter list for selected practice

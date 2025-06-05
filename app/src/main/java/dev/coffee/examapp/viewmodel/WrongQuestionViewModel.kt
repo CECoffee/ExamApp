@@ -109,12 +109,10 @@ class WrongQuestionViewModel : ViewModel() {
                 } else {
                     _errorMessage.value = "加载考试列表失败: ${response.code()}"
                 }
-                _isLoadingDetail.value = false
-
             } catch (e: Exception) {
                 _errorMessage.value = "网络错误: ${e.message}"
             } finally {
-                _isLoading.value = false
+                _isLoadingDetail.value = false
             }
         }
     }

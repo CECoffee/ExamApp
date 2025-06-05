@@ -1,19 +1,14 @@
 package dev.coffee.examapp.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.rounded.Star
-import androidx.compose.material.icons.rounded.StarOutline
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import dev.coffee.examapp.model.WrongQuestion
@@ -21,6 +16,7 @@ import dev.coffee.examapp.model.WrongQuestion
 @Composable
 fun WrongQuestionCard(
     question: WrongQuestion,
+    isLoading: Boolean,
     onViewExplanation: () -> Unit = {},
 ) {
     Card(
@@ -37,16 +33,21 @@ fun WrongQuestionCard(
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            // 题目内容
             Text(
                 text = buildAnnotatedString {
                     withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                         append("题目：")
                     }
-                    append(question.content)
                 },
                 style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(bottom = 8.dp)
+                modifier = Modifier.padding(bottom = 4.dp)
+            )
+
+            LatexWebview(
+                latex = question.content,
+                modifier = Modifier
+                    .padding(bottom = 16.dp)
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
             )
 
             // 用户答案和正确答案
@@ -77,6 +78,7 @@ fun WrongQuestionCard(
             // 操作按钮
             Button(
                 onClick = onViewExplanation,
+                enabled = !isLoading,
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(8.dp),
                 colors = ButtonDefaults.buttonColors(
@@ -84,7 +86,15 @@ fun WrongQuestionCard(
                     contentColor = MaterialTheme.colorScheme.onPrimary
                 )
             ) {
-                Text("查看解析")
+                if (isLoading) {
+                    CircularProgressIndicator(
+                                color = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.size(24.dp),
+                                strokeWidth = 2.dp
+                            )
+                } else {
+                    Text("查看解析")
+                }
             }
         }
     }

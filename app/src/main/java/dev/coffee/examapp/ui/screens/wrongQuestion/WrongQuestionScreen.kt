@@ -82,7 +82,7 @@ fun WrongQuestionScreen(
         ) {
             QuestionCard(
                 question = questionDetail,
-                isLoading = isLoadingDetail,
+                isLoading = false,
                 userAnswer = wrongQuestions.firstOrNull { it.questionId == currentQuestionId }?.myAnswer ?: "",
                 onAnswerChanged = {},
                 showExplanation = true,
@@ -154,6 +154,7 @@ fun WrongQuestionScreen(
                     ) {
                         WrongQuestionCard(
                             question = question,
+                            isLoading = isLoadingDetail,
                             onViewExplanation = { viewModel.viewDetail(question.questionId) }
                         )
                     }

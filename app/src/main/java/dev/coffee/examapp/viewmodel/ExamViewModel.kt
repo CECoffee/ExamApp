@@ -1,6 +1,7 @@
 package dev.coffee.examapp.viewmodel
 
 import android.content.Context
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.coffee.examapp.model.Question
@@ -16,7 +17,7 @@ import kotlin.let
 
 class ExamViewModel(
     private val examId: Int,
-    private val totalTimeSeconds: Int,
+    totalTimeSeconds: Int,
     private val questionIds: List<Int>
 ) : ViewModel() {
     private val apiService: ApiService = RetrofitClient.instance
@@ -29,7 +30,9 @@ class ExamViewModel(
     private var _currentQuestion = MutableStateFlow<Question?>(null)
     val currentQuestion: StateFlow<Question?> = _currentQuestion.asStateFlow()
 
-    private val _userAnswers = mutableMapOf<Int, String>() // 题目ID到答案的映射
+    private var _userAnswer: MutableStateFlow<String> = MutableStateFlow("")
+    val userAnswer: StateFlow<String> = _userAnswer.asStateFlow()
+    private var _isCorrect = MutableStateFlow(false)
     private var _score = MutableStateFlow(0.0)
     val score: StateFlow<Double> = _score.asStateFlow()
 
@@ -97,8 +100,8 @@ class ExamViewModel(
 
     fun updateAnswer(answer: String) {
         currentQuestion.value?.let { question ->
-            _userAnswers[question.id] = answer
-            // 更新当前问题状态以显示新答案
+            _userAnswer.value = answer
+            _isCorrect.value = answer == _currentQuestion.value?.correctAnswer
             _currentQuestion.value = question.copy(myAnswer = answer)
             calculateScore()
         }
@@ -141,9 +144,9 @@ class ExamViewModel(
 
     private suspend fun submitCurrentAnswer(context: Context) {
         currentQuestion.value?.let { question ->
-            _userAnswers[question.id]?.let { answer ->
+            _userAnswer.value.let { answer ->
                 try {
-                    apiService.submitAnswer(question.id, answer)
+                    apiService.submitAnswer(question.id, answer, _isCorrect.value)
                 } catch (e: Exception) {
                     _showToast.value = "答案提交失败: ${e.message}"
                     throw e // 重新抛出异常以阻止导航
@@ -156,7 +159,7 @@ class ExamViewModel(
         val totalQuestions = questionIds.size
         if (totalQuestions == 0) return
 
-        val correctCount = _userAnswers.count()
+        val correctCount = _userAnswer.value.count()
         _score.value = (correctCount.toDouble() / totalQuestions) * 100
     }
 

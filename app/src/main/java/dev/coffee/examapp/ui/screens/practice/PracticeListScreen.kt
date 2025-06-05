@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
@@ -25,11 +26,13 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -88,21 +91,28 @@ fun PracticeListScreen(
                         pageCount = { practices.size }
                     )
 
+                    LaunchedEffect(pagerState) {
+                        // 收集页面变化事件
+                        snapshotFlow { pagerState.currentPage }.collect { page ->
+                            viewModel.selectPractice(page)
+                        }
+                    }
+
                     LaunchedEffect(selectedPracticeIndex) {
-                        pagerState.animateScrollToPage(selectedPracticeIndex)
+                        if (pagerState.currentPage != selectedPracticeIndex) {
+                            pagerState.animateScrollToPage(selectedPracticeIndex)
+                        }
                     }
 
                     HorizontalPager(
                         state = pagerState,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(120.dp),
+                            .wrapContentHeight(),
                         verticalAlignment = Alignment.Top
                     ) { page ->
                         val practice = practices[page]
-                        PracticeHeader(practice = practice) {
-                            navController.navigate("practice/${practice.id}")
-                        }
+                        PracticeHeader( practice = practice )
                     }
 
                     // Dots indicator
@@ -124,13 +134,17 @@ fun PracticeListScreen(
                                     .size(8.dp)
                                     .clip(CircleShape)
                                     .background(color)
-                                    .clickable { viewModel.selectPractice(index) }
+                                    .clickable {
+                                        viewModel.selectPractice(index)
+                                    }
                             )
                         }
                     }
                 }
             }
         }
+
+        Spacer(modifier = Modifier.height(8.dp))
 
         // Loading state
         if (isLoading) {
@@ -164,32 +178,35 @@ fun PracticeListScreen(
 }
 
 @Composable
-fun PracticeHeader(practice: Practice, onPracticeClick: () -> Unit) {
+fun PracticeHeader(practice: Practice) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
-            .clickable(onClick = onPracticeClick),
+            .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
             text = practice.name,
             style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface
         )
         Spacer(modifier = Modifier.height(8.dp))
         LinearProgressIndicator(
-            progress = practice.progress.toFloat(),
+            progress = { practice.progress.toFloat() },
             modifier = Modifier
-                .fillMaxWidth()
-                .height(8.dp)
-                .clip(RoundedCornerShape(4.dp)),
-            color = MaterialTheme.colorScheme.primary
+                            .fillMaxWidth()
+                            .height(8.dp)
+                            .clip(RoundedCornerShape(4.dp)),
+            color = MaterialTheme.colorScheme.primary,
+            trackColor = ProgressIndicatorDefaults.linearTrackColor,
+            strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = "已完成 ${practice.completedCount}/${practice.questionCount}",
-            style = MaterialTheme.typography.bodySmall
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface
         )
     }
 }
@@ -211,7 +228,8 @@ fun ChapterItem(chapter: Chapter, onClick: () -> Unit) {
                 Text(
                     text = chapter.name,
                     style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
                     text = "${(chapter.progress * 100).toInt()}%",
@@ -220,11 +238,14 @@ fun ChapterItem(chapter: Chapter, onClick: () -> Unit) {
             }
             Spacer(modifier = Modifier.height(8.dp))
             LinearProgressIndicator(
-                progress = chapter.progress.toFloat(),
+                progress = { chapter.progress.toFloat() },
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(6.dp)
-                    .clip(RoundedCornerShape(3.dp))
+                                    .fillMaxWidth()
+                                    .height(6.dp)
+                                    .clip(RoundedCornerShape(3.dp)),
+                color = ProgressIndicatorDefaults.linearColor,
+                trackColor = ProgressIndicatorDefaults.linearTrackColor,
+                strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(

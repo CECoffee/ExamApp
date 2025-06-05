@@ -31,18 +31,17 @@ class PracticeListViewModel : ViewModel() {
             _errorMessage.value = null
 
             try {
-                // TODO: Replace with actual API call
-                // val response = apiService.getPractices()
-                // if (response.isSuccessful) {
-                //     _practices.value = response.body() ?: emptyList()
-                // } else {
-                //     _errorMessage.value = "加载练习列表失败: ${response.code()}"
-                // }
+                 val response = apiService.getPractices()
+                 if (response.isSuccessful) {
+                     _practices.value = response.body() ?: emptyList()
+                 } else {
+                     _errorMessage.value = "加载练习列表失败: ${response.code()}"
+                 }
 
-                // Temporary mock data
-                _practices.value = mockPractices()
+                // TEST
+                // _practices.value = mockPractices()
             } catch (e: Exception) {
-                _errorMessage.value = "网络错误: ${e.message}"
+                _errorMessage.value = "错误: ${e.message}"
             } finally {
                 _isLoading.value = false
             }

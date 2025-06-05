@@ -31,6 +31,8 @@ class PracticeViewModel(
     private val _userAnswer = MutableStateFlow("")
     val userAnswer: StateFlow<String> = _userAnswer.asStateFlow()
 
+    private val _isCorrect = MutableStateFlow(false)
+
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
@@ -62,19 +64,19 @@ class PracticeViewModel(
 
         viewModelScope.launch {
             try {
-                // TODO: Replace with actual API call
-                // val response = apiService.getPracticeQuestion(chapterId)
-                // if (response.isSuccessful) {
-                //     _currentQuestion.value = response.body()
-                // } else {
-                //     _showToast.value = "加载题目失败: ${response.code()}"
-                // }
 
-                // Mock data
-                _currentQuestion.value = mockQuestion(
-                    id = _currentQuestionIndex.value + 1,
-                    chapterId = chapterId
-                )
+                 val response = apiService.getPracticeQuestion(chapterId)
+                 if (response.isSuccessful) {
+                     _currentQuestion.value = response.body()
+                 } else {
+                     _showToast.value = "加载题目失败: ${response.code()}"
+                 }
+
+                // TEST
+//                _currentQuestion.value = mockQuestion(
+//                    id = _currentQuestionIndex.value + 1,
+//                    chapterId = chapterId
+//                )
             } catch (e: Exception) {
                 _showToast.value = "网络错误: ${e.message}"
             } finally {
@@ -96,40 +98,36 @@ class PracticeViewModel(
         _isLoading.value = true
         viewModelScope.launch {
             try {
-                // TODO: Replace with actual API call
-                // val response = apiService.submitPracticeAnswer(
-                //     questionId = currentQuestion.value?.id ?: 0,
-                //     chapterId = chapterId,
-                //     answer = _userAnswer.value
-                // )
-                //
-                // if (response.isSuccessful) {
-                //     val result = response.body()!!
-                //     if (result.isCorrect) {
-                //         _correctCount.value++
-                //     }
-                //     _currentQuestion.value = _currentQuestion.value?.copy(
-                //         explanation = result.explanation,
-                //         isCorrect = result.isCorrect
-                //     )
-                //     _showExplanation.value = true
-                // } else {
-                //     _showToast.value = "提交答案失败: ${response.code()}"
-                // }
+                _isCorrect.value = _userAnswer.value == _currentQuestion.value?.correctAnswer
 
-                // Mock submission
-                val isCorrect = Random.nextBoolean()
-                if (isCorrect) {
-                    _correctCount.value++
-                }
-                _currentQuestion.value = _currentQuestion.value?.copy(
-                    explanation = mockExplanation(
-                        questionId = _currentQuestion.value?.id ?: 0,
-                        isCorrect = isCorrect
-                    ),
-                    isCorrect = isCorrect
-                )
-                _showExplanation.value = true
+                 val response = apiService.submitPracticeAnswer(
+                     chapterId = chapterId,
+                     answer = _userAnswer.value,
+                     isCorrect = _isCorrect.value
+                 )
+
+                 if (response.isSuccessful) {
+                     if (_isCorrect.value) {
+                         _correctCount.value++
+                     }
+                     _currentQuestion.value = _currentQuestion.value?.copy(isCorrect = _isCorrect.value)
+                     _showExplanation.value = true
+                 } else {
+                     _showToast.value = "提交答案失败: ${response.code()}"
+                 }
+
+                // TEST
+//                val isCorrect = Random.nextBoolean()
+//                if (isCorrect) {
+//                    _correctCount.value++
+//                }
+//                _currentQuestion.value = _currentQuestion.value?.copy(
+//                    explanation = mockExplanation(
+//                        questionId = _currentQuestion.value?.id ?: 0,
+//                        isCorrect = isCorrect
+//                    )
+//                )
+//                _showExplanation.value = true
             } catch (e: Exception) {
                 _showToast.value = "提交答案失败: ${e.message}"
             } finally {
@@ -167,8 +165,7 @@ class PracticeViewModel(
             ).random()}",
             questionType = QuestionType.FILL_IN_THE_BLANK,
             correctAnswer = "这是关于${topic}的正确答案示例",
-            explanation = null,
-            isCorrect = false
+            explanation = null
         )
     }
 

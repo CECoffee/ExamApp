@@ -6,7 +6,7 @@ data class Practice(
     val questionCount: Int,
     val completedCount: Int,
     val progress: Double, // 0.0 to 1.0
-    val chapters: List<Chapter> // List of chapters in this practice
+    val chapters: List<Chapter>
 )
 
 data class Chapter(

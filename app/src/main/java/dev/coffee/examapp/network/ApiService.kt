@@ -1,6 +1,7 @@
 package dev.coffee.examapp.network
 
 import dev.coffee.examapp.model.Exam
+import dev.coffee.examapp.model.Practice
 import dev.coffee.examapp.model.Question
 import dev.coffee.examapp.model.WrongQuestion
 import retrofit2.Response
@@ -18,7 +19,7 @@ interface ApiService {
     @POST("question/{id}/submit")
     suspend fun submitAnswer(
         @Path("id") id: Int,
-        @Body answer: String
+        @Body answer: String, isCorrect: Boolean
     ): Response<Unit>
 
     @GET("exams")
@@ -38,4 +39,16 @@ interface ApiService {
 
     @DELETE("wrong-questions/{id}")
     suspend fun deleteWrongQuestion( @Path("id") questionId: Int ): Response<Unit>
+
+    @GET("practices")
+    suspend fun getPractices(): Response<List<Practice>>
+
+    @GET("practice-question/{chap_id}")
+    suspend fun getPracticeQuestion(@Path("chap_id") chapterId: Int): Response<Question>
+
+    @POST("practice-question/{chap_id}")
+    suspend fun submitPracticeAnswer(
+        @Path("chap_id") chapterId : Int,
+        @Body answer: String, isCorrect: Boolean
+    ): Response<Unit>
 }

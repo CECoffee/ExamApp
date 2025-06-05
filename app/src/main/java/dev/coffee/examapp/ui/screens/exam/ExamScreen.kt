@@ -24,7 +24,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.coffee.examapp.ui.theme.SuccessColor
 import dev.coffee.examapp.viewmodel.ExamViewModel
-import dev.coffee.examapp.ui.components.AnswerQuestionCard
+import dev.coffee.examapp.ui.components.QuestionCard
 
 @Composable
 fun ExamScreen(
@@ -127,7 +127,7 @@ fun ExamScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         // 题目内容区域
-        AnswerQuestionCard(
+        QuestionCard(
             question = currentQuestion,
             isLoading = isLoading,
             onAnswerChanged = { viewModel.updateAnswer(it) },

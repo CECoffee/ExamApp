@@ -32,7 +32,7 @@ import androidx.compose.ui.unit.sp
 import dev.coffee.examapp.model.Question
 
 @Composable
-fun AnswerQuestionCard(
+fun QuestionCard(
     question: Question?,
     isLoading: Boolean,
     userAnswer: String,
@@ -98,7 +98,6 @@ fun AnswerQuestionCard(
                         .background(MaterialTheme.colorScheme.surfaceVariant)
                 )
 
-                // Answer input or explanation
                 if (showExplanation) {
                     val resultColor = if (question.isCorrect == true) Color(0xFF4CAF50) else Color(0xFFF44336)
                     val resultText = if (question.isCorrect == true) "回答正确" else "回答错误"

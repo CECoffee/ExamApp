@@ -1,7 +1,5 @@
 package dev.coffee.examapp.ui.screens.practice
-import android.webkit.WebView
 import android.widget.Toast
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -36,8 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
-import dev.coffee.examapp.ui.components.AnswerQuestionCard
+import dev.coffee.examapp.ui.components.QuestionCard
 
 @Composable
 fun PracticeScreen(
@@ -62,7 +59,6 @@ fun PracticeScreen(
     val correctCount by viewModel.correctCount.collectAsState()
     val showToast by viewModel.showToast.collectAsState()
 
-    // Handle toast messages
     LaunchedEffect(showToast) {
         showToast?.let {
             Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
@@ -70,7 +66,6 @@ fun PracticeScreen(
         }
     }
 
-    // Handle practice completion
     if (practiceFinished) {
         PracticeResultScreen(
             correctCount = correctCount,
@@ -79,7 +74,6 @@ fun PracticeScreen(
         )
         return
     }
-
 
     Column(
         modifier = Modifier
@@ -98,7 +92,7 @@ fun PracticeScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        AnswerQuestionCard(
+        QuestionCard(
             question = currentQuestion,
             isLoading = isLoading,
             userAnswer = userAnswer,
@@ -109,7 +103,6 @@ fun PracticeScreen(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        // Navigation buttons
         if (showExplanation) {
             Button(
                 onClick = { viewModel.proceedToNextQuestion() },

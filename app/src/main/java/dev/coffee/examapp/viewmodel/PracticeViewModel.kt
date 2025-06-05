@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlin.random.Random
 
 class PracticeViewModel(
     private val chapterId: Int,
@@ -83,7 +82,7 @@ class PracticeViewModel(
                 _isCorrect.value = _userAnswer.value == _currentQuestion.value?.correctAnswer
 
                  val response = apiService.submitPracticeAnswer(
-                     chapterId = chapterId,
+                     chapterId = chapterId.toString(),
                      questionId = _currentQuestion.value?.id,
                      answer = _userAnswer.value,
                      isCorrect = _isCorrect.value
@@ -122,8 +121,10 @@ class PracticeViewModel(
     }
 
     fun proceedToNextQuestion() {
-        _currentQuestionIndex.value++
-        loadNextQuestion()
+        if (_currentQuestion.value != null) {
+            _currentQuestionIndex.value++
+            loadNextQuestion()
+        } else _showToast.value = "本章节题库已空"
     }
 
     fun clearToast() {

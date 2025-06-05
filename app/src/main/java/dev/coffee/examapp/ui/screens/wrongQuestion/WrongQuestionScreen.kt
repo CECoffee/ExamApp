@@ -5,7 +5,6 @@ import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
-import dev.coffee.examapp.R
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -13,20 +12,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FractionalThreshold
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.RemoveCircle
 import androidx.compose.material.rememberSwipeableState
 import androidx.compose.material.swipeable
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -35,10 +26,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
-import dev.coffee.examapp.model.WrongQuestion
+import dev.coffee.examapp.R
 import dev.coffee.examapp.ui.components.LoadingIndicator
+import dev.coffee.examapp.ui.components.QuestionCard
 import dev.coffee.examapp.ui.components.WrongQuestionCard
 import dev.coffee.examapp.ui.theme.ErrorColor
 import dev.coffee.examapp.viewmodel.WrongQuestionViewModel
@@ -48,17 +41,19 @@ import kotlinx.coroutines.withTimeout
 
 @Composable
 fun WrongQuestionScreen(
-    navController: NavController,
     viewModel: WrongQuestionViewModel = viewModel()
 ) {
-    // 从ViewModel获取数据
+    val context = LocalContext.current
     val wrongQuestions by viewModel.wrongQuestions.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
+    val showDialog by viewModel.showQuestionDialog.collectAsState()
+    val currentQuestionId by viewModel.currentQuestionId.collectAsState()
+    val questionDetail by viewModel.questionDetail.collectAsState()
+    val isLoadingDetail by viewModel.isLoadingDetail.collectAsState()
 
-    // 初始化加载数据
     LaunchedEffect(Unit) {
-        // 用于测试的wrongQuestion实例
+        // TEST
 //        val testWrongQuestion = WrongQuestion(
 //            questionId = 1,
 //            content = "这是测试题目内容",
@@ -70,26 +65,61 @@ fun WrongQuestionScreen(
         viewModel.refresh()
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        // 顶部标题
-        Text(
-            text = stringResource(R.string.wrong_questions_title),
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier
-                .padding(16.dp)
-                .align(Alignment.CenterHorizontally)
-        )
+    LaunchedEffect(errorMessage) {
+        errorMessage?.let {
+            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+            viewModel.clearToast()
+        }
+    }
 
-        // 错误信息
-        errorMessage?.let { message ->
-            Text(
-                text = message,
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.padding(horizontal = 16.dp)
+    if (showDialog && errorMessage != null) {
+        Dialog(
+            onDismissRequest = { viewModel.closeQuestionDialog() },
+            properties = DialogProperties(
+                dismissOnBackPress = true,
+                dismissOnClickOutside = true
+            )
+        ) {
+            QuestionCard(
+                question = questionDetail,
+                isLoading = isLoadingDetail,
+                userAnswer = wrongQuestions.firstOrNull { it.questionId == currentQuestionId }?.myAnswer ?: "",
+                onAnswerChanged = {},
+                showExplanation = true,
+                onSubmit = null
             )
         }
+    }
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        // 顶部标题
+        Surface(
+            color = MaterialTheme.colorScheme.surfaceVariant,
+            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+        ) {
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.wrong_questions_title),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .align(Alignment.CenterHorizontally)
+                )
+            }
+        }
+
+        // 错误信息
+//        errorMessage?.let { message ->
+//            Text(
+//                text = message,
+//                color = MaterialTheme.colorScheme.error,
+//                modifier = Modifier.padding(horizontal = 16.dp)
+//            )
+//        }
 
         // 加载状态
         if (isLoading && wrongQuestions.isEmpty()) {
@@ -124,12 +154,11 @@ fun WrongQuestionScreen(
                     ) {
                         WrongQuestionCard(
                             question = question,
-                            onViewExplanation = { /* TODO */ }
+                            onViewExplanation = { viewModel.viewDetail(question.questionId) }
                         )
-    }
+                    }
                 }
 
-                // 加载更多
                 item {
                     if (isLoading) {
                         Box(
@@ -185,12 +214,10 @@ fun SwipeToDeleteContainer(
         )
     }
 
-    // 删除状态
     var deleteState by remember { mutableStateOf<DeleteState>(DeleteState.Idle) }
     val isDeleting = deleteState is DeleteState.Loading
     val coroutineScope = rememberCoroutineScope()
 
-    // 计算卡片偏移量
     val deleteCardBgColor = when {
         isDeleting -> ErrorColor.copy(0.3f)
         else -> ErrorColor.copy(0.8f)
@@ -215,7 +242,6 @@ fun SwipeToDeleteContainer(
         ) {
             content()
 
-            // 删除按钮
             Card(
                 modifier = Modifier
                     .fillMaxHeight()
@@ -245,7 +271,9 @@ fun SwipeToDeleteContainer(
                 ),
             ) {
                 Box(
-                    modifier = Modifier.fillMaxSize().background(deleteCardBgColor),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(deleteCardBgColor),
                     contentAlignment = Alignment.Center
                 ) {
                     when (deleteState) {
@@ -286,10 +314,8 @@ fun SwipeToDeleteContainer(
     }
 }
 
-// 状态枚举
 private enum class SwipePosition { Open, Closed }
 
-// 删除状态密封类
 private sealed class DeleteState {
     object Idle : DeleteState()
     object Loading : DeleteState()

@@ -1,5 +1,6 @@
 package dev.coffee.examapp.ui.screens.practice
 
+import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -31,11 +32,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -53,14 +54,21 @@ fun PracticeListScreen(
     navController: NavController,
     viewModel: PracticeListViewModel = viewModel()
 ) {
-    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
     val isLoading by viewModel.isLoading.collectAsState()
+    val errorMessage by viewModel.errorMessage.collectAsState()
     val practices by viewModel.practices.collectAsState()
     val selectedPracticeIndex by viewModel.selectedPracticeIndex.collectAsState()
 
-    // Initialize data loading
     LaunchedEffect(Unit) {
         viewModel.loadPractices()
+    }
+
+    LaunchedEffect(errorMessage) {
+        errorMessage?.let {
+            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+            viewModel.clearToast()
+        }
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -69,11 +77,8 @@ fun PracticeListScreen(
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp)
+                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
             ) {
-                // Title
                 Text(
                     text = "练习模式",
                     style = MaterialTheme.typography.titleLarge,
@@ -84,7 +89,6 @@ fun PracticeListScreen(
                         .align(Alignment.CenterHorizontally)
                 )
 
-                // Practice Picker
                 if (practices.isNotEmpty()) {
                     val pagerState = rememberPagerState(
                         initialPage = selectedPracticeIndex,
@@ -92,7 +96,6 @@ fun PracticeListScreen(
                     )
 
                     LaunchedEffect(pagerState) {
-                        // 收集页面变化事件
                         snapshotFlow { pagerState.currentPage }.collect { page ->
                             viewModel.selectPractice(page)
                         }
@@ -161,7 +164,6 @@ fun PracticeListScreen(
                 )
             }
         } else {
-            // Chapter list for selected practice
             val selectedPractice = practices[selectedPracticeIndex]
             LazyColumn(
                 modifier = Modifier

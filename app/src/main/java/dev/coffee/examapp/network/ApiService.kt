@@ -44,7 +44,7 @@ interface ApiService {
 
     @POST("practice-question/{chap_id}")
     suspend fun submitPracticeAnswer(
-        @Path("chap_id") chapterId : Int,
+        @Path("chap_id") chapterId : String,
         @Body questionId: Int? = null, answer: String? = null, isCorrect: Boolean? =null
     ): Response<Question>
 }

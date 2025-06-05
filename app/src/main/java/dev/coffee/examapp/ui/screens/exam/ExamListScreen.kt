@@ -1,5 +1,6 @@
 package dev.coffee.examapp.ui.screens.exam
 
+import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
@@ -17,6 +18,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -38,8 +40,10 @@ fun ExamListScreen(
     navController: NavController,
     viewModel: ExamListViewModel = viewModel()
 ) {
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val isLoading by viewModel.isLoading.collectAsState()
+    val errorMessage by viewModel.errorMessage.collectAsState()
     val tabs = listOf(
         TabItem(
             title = stringResource(R.string.tab_pending),
@@ -60,9 +64,15 @@ fun ExamListScreen(
 
     val pagerState = rememberPagerState { tabs.size }
 
-    // 初始化加载数据
     LaunchedEffect(Unit) {
         viewModel.loadExams()
+    }
+
+    LaunchedEffect(errorMessage) {
+        errorMessage?.let {
+            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+            viewModel.clearToast()
+        }
     }
 
     Column(modifier = Modifier.fillMaxSize()) {

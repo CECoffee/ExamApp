@@ -45,4 +45,8 @@ class ExamListViewModel : ViewModel() {
     fun filterExamsByStatus(status: ExamStatus): List<Exam> {
         return _exams.value.filter { it.status == status }
     }
+
+    fun clearToast() {
+        _errorMessage.value = null
+    }
 }

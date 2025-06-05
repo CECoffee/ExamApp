@@ -52,6 +52,10 @@ class PracticeListViewModel : ViewModel() {
         _selectedPracticeIndex.value = index
     }
 
+    fun clearToast() {
+        _errorMessage.value = null
+    }
+
     private fun mockPractices(): List<Practice> {
         return listOf(
             Practice(

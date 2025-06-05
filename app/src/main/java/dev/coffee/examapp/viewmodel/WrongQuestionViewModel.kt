@@ -3,6 +3,7 @@ package dev.coffee.examapp.viewmodel
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dev.coffee.examapp.model.Question
 import dev.coffee.examapp.model.WrongQuestion
 import dev.coffee.examapp.network.ApiService
 import dev.coffee.examapp.network.RetrofitClient
@@ -17,6 +18,17 @@ class WrongQuestionViewModel : ViewModel() {
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
+    private val _isLoadingDetail = MutableStateFlow(false)
+    val isLoadingDetail: StateFlow<Boolean> = _isLoadingDetail.asStateFlow()
+
+    private val _showQuestionDialog = MutableStateFlow(false)
+    val showQuestionDialog: StateFlow<Boolean> = _showQuestionDialog
+
+    private val _currentQuestionId = MutableStateFlow<Int?>(null)
+    val currentQuestionId: StateFlow<Int?> = _currentQuestionId
+
+    val questionDetail = MutableStateFlow<Question?>(null)
 
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
@@ -85,5 +97,40 @@ class WrongQuestionViewModel : ViewModel() {
         } catch (e: Exception) {
             deleteState.value = DeleteState.Error(e.message ?: "删除失败")
         }
+    }
+
+    fun getQuestionDetail(questionId: Int) {
+        viewModelScope.launch{
+            try {
+                _isLoadingDetail.value = true
+                val response = apiService.getQuestion(questionId)
+                if (response.isSuccessful) {
+                    questionDetail.value = response.body()
+                } else {
+                    _errorMessage.value = "加载考试列表失败: ${response.code()}"
+                }
+                _isLoadingDetail.value = false
+
+            } catch (e: Exception) {
+                _errorMessage.value = "网络错误: ${e.message}"
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun viewDetail(questionId: Int) {
+        _currentQuestionId.value = questionId
+        _showQuestionDialog.value = true
+        getQuestionDetail(questionId)
+    }
+
+    fun closeQuestionDialog() {
+        _showQuestionDialog.value = false
+        _currentQuestionId.value = null
+    }
+
+    fun clearToast() {
+        _errorMessage.value = null
     }
 }

@@ -7,6 +7,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import dev.coffee.examapp.ui.screens.ServerConfigScreen
 import dev.coffee.examapp.ui.screens.exam.ExamListScreen
 import dev.coffee.examapp.ui.screens.exam.ExamResultScreen
 import dev.coffee.examapp.ui.screens.exam.ExamScreen
@@ -20,9 +21,12 @@ fun NavigationHost(navController: NavHostController,
                    modifier: Modifier = Modifier) {
     NavHost(
         navController = navController,
-        startDestination = Screen.ExamList.route,
+        startDestination = Screen.ServerConfig.route,
         modifier = modifier
     ) {
+        composable(Screen.ServerConfig.route) {
+            ServerConfigScreen(navController)
+        }
         composable(Screen.Practice.route) {
             PracticeListScreen(navController)
         }
@@ -30,7 +34,7 @@ fun NavigationHost(navController: NavHostController,
             ExamListScreen(navController)
         }
         composable(Screen.WrongQuestion.route) {
-            WrongQuestionScreen(navController)
+            WrongQuestionScreen()
         }
         composable(Screen.Exam.route + "/{examId}/{duration}/{questionIds}",
             arguments = listOf(

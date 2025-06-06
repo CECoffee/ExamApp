@@ -95,12 +95,22 @@ fun QuestionCard(
                     latex = question.content,
                     modifier = Modifier
                         .padding(bottom = 16.dp)
-                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .background(Color.Transparent)
                 )
 
                 if (showExplanation) {
+                    val resultColor = if (question.isCorrect == true) Color(0xFF4CAF50) else Color(0xFFF44336)
+                    val resultText = if (question.isCorrect == true) "回答正确" else "回答错误"
+
                     Text(
-                        text = "你的答案: ${question.myAnswer}",
+                        text = resultText,
+                        color = resultColor,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+
+                    Text(
+                        text = "你的答案: $userAnswer",
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
 
@@ -121,7 +131,7 @@ fun QuestionCard(
                             latex = it,
                             modifier = Modifier
                                 .padding(bottom = 16.dp)
-                                .background(MaterialTheme.colorScheme.surfaceVariant)
+                                .background(Color.Transparent)
                         )
                     }
 
@@ -139,7 +149,6 @@ fun QuestionCard(
                             focusedIndicatorColor = MaterialTheme.colorScheme.primary,
                             unfocusedIndicatorColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                         ),
-                        // [NEW] Added keyboard options for Enter key submission
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                         keyboardActions = KeyboardActions(
                             onDone = { onSubmit?.invoke() }

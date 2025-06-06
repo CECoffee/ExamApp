@@ -67,9 +67,11 @@ fun NavigationHost(navController: NavHostController,
             )
         }
 
-        // In your navigation graph:
         composable("practice/{chapterId}/{chapterName}") { backStackEntry ->
-            val chapterId = backStackEntry.arguments?.getString("chapterId")?.toIntOrNull() ?: 0
+            val chapterId = URLDecoder.decode(
+                backStackEntry.arguments?.getString("chapterId") ?: "",
+                "utf-8"
+            )
             val chapterName = URLDecoder.decode(
                 backStackEntry.arguments?.getString("chapterName") ?: "",
                 "utf-8"

@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class PracticeViewModel(
-    private val chapterId: Int,
+    private val chapterId: String,
     private val chapterName: String
 ) : ViewModel() {
     private val apiService: ApiService = RetrofitClient.instance
@@ -51,6 +51,19 @@ class PracticeViewModel(
     val correctCount: StateFlow<Int> = _correctCount.asStateFlow()
 
     init {
+        viewModelScope.launch {
+            initQuestion()
+            loadNextQuestion()
+        }
+    }
+
+    fun proceedToNextQuestion() {
+        if (_nextQuestion.value?.id != 0) {
+            _currentQuestionIndex.value++
+        } else {
+            _showToast.value = "本章节题库已空"
+            _practiceFinished.value = true
+        }
         loadNextQuestion()
     }
 
@@ -60,7 +73,6 @@ class PracticeViewModel(
             return
         }
 
-        _isLoading.value = true
         _userAnswer.value = ""
         _showExplanation.value = false
 
@@ -83,9 +95,9 @@ class PracticeViewModel(
                 _isCorrect.value = _userAnswer.value == _currentQuestion.value?.correctAnswer
 
                  val response = apiService.submitPracticeAnswer(
-                     chapterId = chapterId.toString(),
-                     SubmitPracticeAnswerRequest(
-                         questionId = _currentQuestion.value?.id,
+                     chapterId = chapterId,
+                     request = SubmitPracticeAnswerRequest(
+                        questionId = _currentQuestion.value?.id,
                         answer = _userAnswer.value,
                         isCorrect = _isCorrect.value
                      )
@@ -116,19 +128,33 @@ class PracticeViewModel(
 //                )
 //                _showExplanation.value = true
             } catch (e: Exception) {
-                _showToast.value = "提交答案失败: ${e.message}"
+                _showToast.value = "失败: ${e.message}"
             } finally {
                 _isLoading.value = false
             }
         }
     }
 
-    fun proceedToNextQuestion() {
-        if (_currentQuestion.value != null) {
-            _currentQuestionIndex.value++
-            loadNextQuestion()
-        } else _showToast.value = "本章节题库已空"
+    suspend fun initQuestion() {
+        _isLoading.value = true
+        try {
+             val response = apiService.submitPracticeAnswer(
+                 chapterId = chapterId,
+                 request = SubmitPracticeAnswerRequest(null, null, null)
+             )
+
+            if (response.isSuccessful) {
+                _nextQuestion.value = response.body()
+            } else {
+                _showToast.value = "获取题目失败: ${response.code()}"
+            }
+        } catch (e: Exception) {
+            _showToast.value = "失败: ${e.message}"
+        } finally {
+            _isLoading.value = false
+        }
     }
+
 
     fun clearToast() {
         _showToast.value = null

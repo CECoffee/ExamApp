@@ -6,6 +6,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -47,7 +48,7 @@ fun WrongQuestionCard(
                 latex = question.content,
                 modifier = Modifier
                     .padding(bottom = 16.dp)
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .background(Color.Transparent)
             )
 
             // 用户答案和正确答案

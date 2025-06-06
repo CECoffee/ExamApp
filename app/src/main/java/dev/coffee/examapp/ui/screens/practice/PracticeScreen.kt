@@ -38,7 +38,7 @@ import dev.coffee.examapp.ui.components.QuestionCard
 
 @Composable
 fun PracticeScreen(
-    chapterId: Int,
+    chapterId: String,
     chapterName: String,
     onBack: () -> Unit,
     viewModel: PracticeViewModel = viewModel(
@@ -114,8 +114,7 @@ fun PracticeScreen(
                 )
             ) {
                 Text(
-                    text = if (currentIndex < viewModel.totalQuestions - 1) "下一题" else "完成练习",
-                    color = MaterialTheme.colorScheme.onPrimary
+                    text = if (currentIndex < viewModel.totalQuestions - 1) "下一题" else "完成练习"
                 )
             }
         } else {
@@ -131,13 +130,11 @@ fun PracticeScreen(
             ) {
                 if (isLoading) {
                     CircularProgressIndicator(
-                        color = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier.size(20.dp)
                     )
                 } else {
                     Text(
-                        text = "提交答案",
-                        color = MaterialTheme.colorScheme.onPrimary
+                        text = "提交答案"
                     )
                 }
             }

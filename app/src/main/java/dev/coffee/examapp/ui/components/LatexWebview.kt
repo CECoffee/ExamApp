@@ -36,7 +36,6 @@ fun LatexWebview(
 ) {
     val context = LocalContext.current
     val textColor = MaterialTheme.colorScheme.onSurface
-    val bgColor = MaterialTheme.colorScheme.background
     var webViewRef by remember { mutableStateOf<WebView?>(null) }
     var webViewHeight by remember { mutableStateOf(0) }
     val touchStartTimeTagKey = remember { Random.nextInt() }
@@ -119,7 +118,7 @@ fun LatexWebview(
             }
         },
         update = { webView ->
-            val htmlContent = buildHtmlContent(latex, textColor, bgColor)
+            val htmlContent = buildHtmlContent(latex, textColor)
             webView.loadDataWithBaseURL(
                 "https://example.com/",
                 htmlContent,
@@ -133,11 +132,9 @@ fun LatexWebview(
 
 private fun buildHtmlContent(
     latex: String,
-    textColor: Color,
-    bgColor: Color
+    textColor: Color
 ): String {
     val textColorHex = "#${textColor.toArgb().toUInt().toString(16).substring(2)}"
-    val bgColorHex = "#${bgColor.toArgb().toUInt().toString(16).substring(2)}"
 
     val escapedLatex = latex
         .replace("\\", "\\\\")
@@ -157,7 +154,7 @@ private fun buildHtmlContent(
         <style>
             body {
                 margin: 0;
-                padding: 0;
+                padding: 8px;
                 background-color: transparent !important;
                 color: $textColorHex !important;
                 overflow: hidden;

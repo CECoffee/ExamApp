@@ -48,7 +48,7 @@ fun WrongQuestionScreen(
     val isLoading by viewModel.isLoading.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
     val showDialog by viewModel.showQuestionDialog.collectAsState()
-    val currentQuestionId by viewModel.currentQuestionId.collectAsState()
+    val hasMore by viewModel.hasMore.collectAsState()
     val questionDetail by viewModel.questionDetail.collectAsState()
     val loadingDetailId by viewModel.loadingDetailId.collectAsState()
 
@@ -173,7 +173,7 @@ fun WrongQuestionScreen(
                                 strokeWidth = 2.dp
                             )
                         }
-                    } else if (wrongQuestions.isNotEmpty()) {
+                    } else if (hasMore) {
                         Button(
                             onClick = { viewModel.loadNextPage() },
                             modifier = Modifier

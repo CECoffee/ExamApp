@@ -191,6 +191,7 @@ fun PracticeHeader(practice: Practice) {
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        val progress = (practice.completedCount.toFloat()/practice.questionCount.toFloat())
         Text(
             text = practice.name,
             style = MaterialTheme.typography.titleMedium,
@@ -199,7 +200,7 @@ fun PracticeHeader(practice: Practice) {
         )
         Spacer(modifier = Modifier.height(8.dp))
         LinearProgressIndicator(
-            progress = { practice.progress.toFloat() },
+            progress = { progress },
             modifier = Modifier
                             .fillMaxWidth()
                             .height(8.dp)
@@ -210,7 +211,7 @@ fun PracticeHeader(practice: Practice) {
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "已完成 ${practice.completedCount}/${practice.questionCount}",
+            text = "已完成 ${progress}",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurface
         )
@@ -226,6 +227,7 @@ fun ChapterItem(chapter: Chapter, onClick: () -> Unit) {
             .clickable(onClick = onClick),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
+        val progress = (chapter.completedCount.toFloat()/chapter.questionCount.toFloat())
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -238,13 +240,13 @@ fun ChapterItem(chapter: Chapter, onClick: () -> Unit) {
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
-                    text = "${(chapter.progress * 100).toInt()}%",
+                    text = "${(progress * 100).toInt()}%",
                     color = MaterialTheme.colorScheme.primary
                 )
             }
             Spacer(modifier = Modifier.height(8.dp))
             LinearProgressIndicator(
-                progress = { chapter.progress.toFloat() },
+                progress = { progress },
                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(6.dp)

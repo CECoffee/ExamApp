@@ -64,15 +64,14 @@ class PracticeListViewModel : ViewModel() {
                 name = "高等数学",
                 questionCount = 200,
                 completedCount = 75,
-                progress = 0.375,
                 chapters = listOf(
-                    Chapter("1", "函数与极限", 30, 10, 0.333),
-                    Chapter("2", "导数与微分", 40, 15, 0.375),
-                    Chapter("3", "积分学", 50, 20, 0.4),
-                    Chapter("4", "多元函数", 40, 20, 0.5),
-                    Chapter("5", "级数", 40, 10, 0.25),
-                    Chapter("6", "级数", 40, 10, 0.25),
-                    Chapter("7", "级数", 40, 10, 0.25)
+                    Chapter("1", "函数与极限", 30, 10),
+                    Chapter("2", "导数与微分", 40, 15),
+                    Chapter("3", "积分学", 50, 20),
+                    Chapter("4", "多元函数", 40, 20),
+                    Chapter("5", "级数", 40, 10),
+                    Chapter("6", "级数", 40, 10),
+                    Chapter("7", "级数", 40, 10)
 
                 )
             ),
@@ -81,13 +80,12 @@ class PracticeListViewModel : ViewModel() {
                 name = "线性代数",
                 questionCount = 150,
                 completedCount = 90,
-                progress = 0.6,
                 chapters = listOf(
-                    Chapter("1", "行列式", 20, 15, 0.75),
-                    Chapter("2", "矩阵", 30, 20, 0.666),
-                    Chapter("3", "向量组", 40, 25, 0.625),
-                    Chapter("4", "线性方程组", 30, 20, 0.666),
-                    Chapter("5", "特征值与特征向量", 30, 10, 0.333)
+                    Chapter("1", "行列式", 20, 15),
+                    Chapter("2", "矩阵", 30, 20),
+                    Chapter("3", "向量组", 40, 25),
+                    Chapter("4", "线性方程组", 30, 20),
+                    Chapter("5", "特征值与特征向量", 30, 10)
                 )
             ),
             Practice(
@@ -95,13 +93,12 @@ class PracticeListViewModel : ViewModel() {
                 name = "概率统计",
                 questionCount = 180,
                 completedCount = 45,
-                progress = 0.25,
                 chapters = listOf(
-                    Chapter("1", "随机事件", 30, 10, 0.333),
-                    Chapter("2", "随机变量", 40, 15, 0.375),
-                    Chapter("3", "多维随机变量", 50, 10, 0.2),
-                    Chapter("4", "数字特征", 30, 5, 0.166),
-                    Chapter("5", "大数定律", 30, 5, 0.166)
+                    Chapter("1", "随机事件", 30, 10),
+                    Chapter("2", "随机变量", 40, 15),
+                    Chapter("3", "多维随机变量", 50, 10),
+                    Chapter("4", "数字特征", 30, 5),
+                    Chapter("5", "大数定律", 30, 5)
                 )
             )
         )

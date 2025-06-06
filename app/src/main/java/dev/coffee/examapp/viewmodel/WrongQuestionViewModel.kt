@@ -26,7 +26,6 @@ class WrongQuestionViewModel : ViewModel() {
     val showQuestionDialog: StateFlow<Boolean> = _showQuestionDialog
 
     private val _currentQuestionId = MutableStateFlow<Int?>(null)
-    val currentQuestionId: StateFlow<Int?> = _currentQuestionId
 
     val questionDetail = MutableStateFlow<Question?>(null)
 
@@ -71,7 +70,7 @@ class WrongQuestionViewModel : ViewModel() {
                     _errorMessage.value = "加载错题失败: ${response.code()}"
                 }
             } catch (e: Exception) {
-                _errorMessage.value = "网络错误: ${e.message}"
+                _errorMessage.value = "错误: ${e.message}"
             } finally {
                 _isLoading.value = false
             }
@@ -110,7 +109,7 @@ class WrongQuestionViewModel : ViewModel() {
                     _errorMessage.value = "加载考试列表失败: ${response.code()}"
                 }
             } catch (e: Exception) {
-                _errorMessage.value = "网络错误: ${e.message}"
+                _errorMessage.value = "错误: ${e.message}"
             } finally {
                 _loadingDetailId.value = null
                 _showQuestionDialog.value = true

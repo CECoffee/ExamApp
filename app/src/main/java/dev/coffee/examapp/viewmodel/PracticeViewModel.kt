@@ -151,7 +151,7 @@ class PracticeViewModel(
             ).random()}",
             questionType = QuestionType.FILL_IN_THE_BLANK,
             correctAnswer = "这是关于${topic}的正确答案示例",
-            explanation = null
+            explanation = ""
         )
     }
 

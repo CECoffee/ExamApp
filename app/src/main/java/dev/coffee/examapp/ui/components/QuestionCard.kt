@@ -99,32 +99,32 @@ fun QuestionCard(
                 )
 
                 if (showExplanation) {
-                    val resultColor = if (question.isCorrect == true) Color(0xFF4CAF50) else Color(0xFFF44336)
-                    val resultText = if (question.isCorrect == true) "回答正确" else "回答错误"
-
                     Text(
-                        text = resultText,
-                        color = resultColor,
-                        fontWeight = FontWeight.Bold,
+                        text = "你的答案: ${question.myAnswer}",
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
 
                     Text(
-                        text = "你的答案: $userAnswer",
+                        text = "正确答案: ${question.correctAnswer}",
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
 
-                    if (!question.isCorrect!!) {
-                        Text(
-                            text = "正确答案: ${question.correctAnswer}",
-                            modifier = Modifier.padding(bottom = 8.dp)
+                    Text(
+                        text = "解析:",
+                        modifier = Modifier.padding(bottom = 4.dp),
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Bold
+                    )
+
+                    question.correctAnswer?.let {
+                        LatexWebview(
+                            latex = it,
+                            modifier = Modifier
+                                .padding(bottom = 16.dp)
+                                .background(MaterialTheme.colorScheme.surfaceVariant)
                         )
                     }
 
-                    Text(
-                        text = "解析: ${question.explanation}",
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
-                    )
                 } else {
                     TextField(
                         value = userAnswer,

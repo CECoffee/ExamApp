@@ -6,9 +6,9 @@ data class Question(
     val content: String,
     val questionType: QuestionType,
     val options: List<String>? = null,
-    val correctAnswer: String,
+    val correctAnswer: String? = null,
     val myAnswer: String? = null,
-    val explanation: String? = null,
+    val explanation: String,
     val isCorrect: Boolean? = null
 )
 

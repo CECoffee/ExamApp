@@ -50,7 +50,7 @@ fun WrongQuestionScreen(
     val showDialog by viewModel.showQuestionDialog.collectAsState()
     val currentQuestionId by viewModel.currentQuestionId.collectAsState()
     val questionDetail by viewModel.questionDetail.collectAsState()
-    val isLoadingDetail by viewModel.isLoadingDetail.collectAsState()
+    val loadingDetailId by viewModel.loadingDetailId.collectAsState()
 
     LaunchedEffect(Unit) {
         // TEST
@@ -72,7 +72,7 @@ fun WrongQuestionScreen(
         }
     }
 
-    if (showDialog && errorMessage != null) {
+    if (showDialog && errorMessage == null) {
         Dialog(
             onDismissRequest = { viewModel.closeQuestionDialog() },
             properties = DialogProperties(
@@ -83,7 +83,7 @@ fun WrongQuestionScreen(
             QuestionCard(
                 question = questionDetail,
                 isLoading = false,
-                userAnswer = wrongQuestions.firstOrNull { it.questionId == currentQuestionId }?.myAnswer ?: "",
+                userAnswer = "",
                 onAnswerChanged = {},
                 showExplanation = true,
                 onSubmit = null
@@ -154,7 +154,7 @@ fun WrongQuestionScreen(
                     ) {
                         WrongQuestionCard(
                             question = question,
-                            isLoading = isLoadingDetail,
+                            isLoading = loadingDetailId == question.questionId,
                             onViewExplanation = { viewModel.viewDetail(question.questionId) }
                         )
                     }

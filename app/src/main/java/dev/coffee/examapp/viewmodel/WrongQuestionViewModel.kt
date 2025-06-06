@@ -19,8 +19,8 @@ class WrongQuestionViewModel : ViewModel() {
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
-    private val _isLoadingDetail = MutableStateFlow(false)
-    val isLoadingDetail: StateFlow<Boolean> = _isLoadingDetail.asStateFlow()
+    private val _loadingDetailId = MutableStateFlow<Int?>(null)
+    val loadingDetailId: StateFlow<Int?> = _loadingDetailId.asStateFlow()
 
     private val _showQuestionDialog = MutableStateFlow(false)
     val showQuestionDialog: StateFlow<Boolean> = _showQuestionDialog
@@ -102,7 +102,7 @@ class WrongQuestionViewModel : ViewModel() {
     fun getQuestionDetail(questionId: Int) {
         viewModelScope.launch{
             try {
-                _isLoadingDetail.value = true
+                _loadingDetailId.value = questionId
                 val response = apiService.getQuestion(questionId)
                 if (response.isSuccessful) {
                     questionDetail.value = response.body()
@@ -112,14 +112,14 @@ class WrongQuestionViewModel : ViewModel() {
             } catch (e: Exception) {
                 _errorMessage.value = "网络错误: ${e.message}"
             } finally {
-                _isLoadingDetail.value = false
+                _loadingDetailId.value = null
+                _showQuestionDialog.value = true
             }
         }
     }
 
     fun viewDetail(questionId: Int) {
         _currentQuestionId.value = questionId
-        _showQuestionDialog.value = true
         getQuestionDetail(questionId)
     }
 

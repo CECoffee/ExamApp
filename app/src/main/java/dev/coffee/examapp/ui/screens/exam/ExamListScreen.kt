@@ -204,7 +204,11 @@ fun ExamList(exams: List<Exam>, status: ExamStatus, navController: NavController
             exams.forEach { exam ->
                 ExamCard(
                     exam = exam,
-                    onStartExam = { navController.navigate(Screen.Exam.route + "/${exam.id}/${exam.duration}/${exam.questionList.joinToString(",")}") },
+                    onStartExam = {
+                        if (exam.questionList.isNotEmpty())
+                            navController.navigate(Screen.Exam.route +
+                                    "/${exam.id}/${exam.duration}/${exam.questionList.joinToString(",")}")
+                    },
                     onViewResult = { navController.navigate(Screen.ExamResult.route + "/${exam.score}") }
                 )
             }

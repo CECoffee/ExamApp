@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import dev.coffee.examapp.model.Question
 import dev.coffee.examapp.network.ApiService
 import dev.coffee.examapp.network.RetrofitClient
+import dev.coffee.examapp.network.ScoreRequest
+import dev.coffee.examapp.network.SubmitAnswerRequest
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,6 +21,9 @@ class ExamViewModel(
     private val questionIds: List<Int>
 ) : ViewModel() {
     private val apiService: ApiService = RetrofitClient.instance
+
+    private val _scorePerQuestion = 100 / questionIds.size
+
     private var _remainingTime = MutableStateFlow(totalTimeSeconds)
     val remainingTime: StateFlow<Int> = _remainingTime.asStateFlow()
 
@@ -99,9 +104,7 @@ class ExamViewModel(
     fun updateAnswer(answer: String) {
         currentQuestion.value?.let { question ->
             _userAnswer.value = answer
-            _isCorrect.value = answer == _currentQuestion.value?.correctAnswer
             _currentQuestion.value = question.copy(myAnswer = answer)
-            calculateScore()
         }
     }
 
@@ -144,21 +147,20 @@ class ExamViewModel(
         currentQuestion.value?.let { question ->
             _userAnswer.value.let { answer ->
                 try {
-                    apiService.submitExamAnswer(question.id, answer, _isCorrect.value)
+                    _isCorrect.value = (answer == _currentQuestion.value?.correctAnswer)
+                    calculateScore()
+                    apiService.submitExamAnswer(question.id, SubmitAnswerRequest(answer, _isCorrect.value))
+                    _userAnswer.value = ""
                 } catch (e: Exception) {
                     _showToast.value = "答案提交失败: ${e.message}"
-                    throw e // 重新抛出异常以阻止导航
+                    throw e
                 }
             }
         }
     }
 
     private fun calculateScore() {
-        val totalQuestions = questionIds.size
-        if (totalQuestions == 0) return
-
-        val correctCount = _userAnswer.value.count()
-        _score.value = (correctCount.toDouble() / totalQuestions) * 100
+        if (_isCorrect.value) _score.value += _scorePerQuestion
     }
 
     fun clearToast() {
@@ -169,7 +171,7 @@ class ExamViewModel(
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                apiService.submitExam(examId, score.value)
+                apiService.submitExam(examId, ScoreRequest(score.value))
                 _examFinished.value = true
             } catch (e: Exception) {
                 _showToast.value = "考试提交失败: ${e.message}"

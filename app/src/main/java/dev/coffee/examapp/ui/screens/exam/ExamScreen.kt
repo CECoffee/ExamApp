@@ -62,10 +62,8 @@ fun ExamScreen(
     val userAnswer by viewModel.userAnswer.collectAsState()
     val examFinished by viewModel.examFinished.collectAsState()
 
-    // 处理中途返回
     var showExitConfirmation by remember { mutableStateOf(false) }
     BackHandler(enabled = true) {
-        // 如果考试已经结束，直接返回
         if (examFinished) {
             onBack()
         } else {
@@ -105,13 +103,11 @@ fun ExamScreen(
         )
     }
 
-    // 考试结束处理
     if (examFinished) {
         ExamResultScreen(scoreString = score.toString(), onBack = onBack)
         return
     }
 
-    // 主界面
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -196,21 +192,6 @@ fun ExamHeader(
                 fontWeight = FontWeight.Bold
             )
         }
-
-        // 当前得分
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(
-                text = "当前得分",
-                color = MaterialTheme.colorScheme.onSurface,
-                fontSize = 14.sp
-            )
-            Text(
-                text = "${score.toInt()}分",
-                color = MaterialTheme.colorScheme.onSurface,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
     }
 }
 
@@ -256,7 +237,7 @@ fun NavigationButtons(
                 enabled = !isLoading,
                 modifier = Modifier.width(120.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = SuccessColor.copy(0.4f)
+                    containerColor = SuccessColor.copy(0.8f)
                 )
             ) {
                 if (isLoading) {
@@ -288,7 +269,7 @@ fun NavigationButtons(
                 } else {
                     Text(
                         text = "下一题",
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
                 }
             }

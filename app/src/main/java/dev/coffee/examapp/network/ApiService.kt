@@ -18,7 +18,7 @@ interface ApiService {
     @POST("question/{id}/submit")
     suspend fun submitExamAnswer(
         @Path("id") id: Int,
-        @Body answer: String, isCorrect: Boolean
+        @Body request: SubmitAnswerRequest
     ): Response<Unit>
 
     @GET("exams")
@@ -27,7 +27,7 @@ interface ApiService {
     @POST("exams/{id}/submit")
     suspend fun submitExam(
         @Path("id") examId: Int,
-        @Body score: Double
+        @Body request: ScoreRequest
     ): Response<Unit>
 
     @GET("wrong-questions")
@@ -45,6 +45,13 @@ interface ApiService {
     @POST("practice-question/{chap_id}")
     suspend fun submitPracticeAnswer(
         @Path("chap_id") chapterId : String,
-        @Body questionId: Int? = null, answer: String? = null, isCorrect: Boolean? =null
+        @Body request: SubmitPracticeAnswerRequest
     ): Response<Question>
 }
+
+
+data class SubmitAnswerRequest(val answer: String, val isCorrect: Boolean)
+
+data class SubmitPracticeAnswerRequest(val questionId: Int? = null, val answer: String? = null, val isCorrect: Boolean? = null)
+
+data class ScoreRequest(val score: Double)

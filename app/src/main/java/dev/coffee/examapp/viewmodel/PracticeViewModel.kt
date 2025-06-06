@@ -6,6 +6,7 @@ import dev.coffee.examapp.model.Question
 import dev.coffee.examapp.model.QuestionType
 import dev.coffee.examapp.network.ApiService
 import dev.coffee.examapp.network.RetrofitClient
+import dev.coffee.examapp.network.SubmitPracticeAnswerRequest
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -83,9 +84,11 @@ class PracticeViewModel(
 
                  val response = apiService.submitPracticeAnswer(
                      chapterId = chapterId.toString(),
-                     questionId = _currentQuestion.value?.id,
-                     answer = _userAnswer.value,
-                     isCorrect = _isCorrect.value
+                     SubmitPracticeAnswerRequest(
+                         questionId = _currentQuestion.value?.id,
+                        answer = _userAnswer.value,
+                        isCorrect = _isCorrect.value
+                     )
                  )
 
                  if (response.isSuccessful) {

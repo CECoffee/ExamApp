@@ -10,26 +10,25 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.coffee.examapp.model.Question
+import dev.coffee.examapp.ui.components.latex.LatexWebview
+import dev.coffee.examapp.ui.components.latex.MathLiveEditor
 
 @Composable
 fun QuestionCard(
@@ -57,7 +56,6 @@ fun QuestionCard(
                     CircularProgressIndicator()
                 }
             } else if (question != null) {
-                // Difficulty indicator
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End
@@ -109,15 +107,27 @@ fun QuestionCard(
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
 
-                    Text(
-                        text = "你的答案: $userAnswer",
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "你的答案:",
+                            modifier = Modifier.wrapContentWidth()
+                        )
+                        LatexWebview(userAnswer, Modifier.fillMaxWidth())
+                    }
 
-                    Text(
-                        text = "正确答案: ${question.correctAnswer}",
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "正确答案:",
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+                        LatexWebview(question.correctAnswer?: "", Modifier.fillMaxWidth())
+                    }
 
                     Text(
                         text = "解析:",
@@ -136,7 +146,7 @@ fun QuestionCard(
                     }
 
                 } else {
-                    TextField(
+                    /*TextField(
                         value = userAnswer,
                         onValueChange = onAnswerChanged,
                         modifier = Modifier
@@ -153,6 +163,15 @@ fun QuestionCard(
                         keyboardActions = KeyboardActions(
                             onDone = { onSubmit?.invoke() }
                         )
+                    )*/
+                    MathLiveEditor(
+                        initialLatex = userAnswer,
+                        onAnswerChanged = { newLatex ->
+                            onAnswerChanged(newLatex)
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .wrapContentHeight()
                     )
                 }
             } else {

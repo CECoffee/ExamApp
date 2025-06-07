@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <script defer src="https://unpkg.com/mathlive"></script>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 8px;
+            background-color: transparent;
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+
+        .ML__keyboard {
+            display: none !important;
+        }
+
+        /*math-field::part(content) { color: ${getQueryParam('color')} }*/
+        math-field::part(virtual-keyboard-toggle) { display: none; }
+        math-field::part(menu-toggle) { display: none; }
+
+    </style>
+</head>
+<body>
+    <math-field
+        read-only
+        placeholder="\text{点击输入答案}"
+        id="mf"
+        style="display: block; background: transparent">
+    </math-field>
+    <script>
+        const mf = document.getElementById("mf");
+        // 解析URL参数
+        function getQueryParam(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        const mathField = document.querySelector('math-field');
+        mathField.style.color = getQueryParam('color');
+
+        mathField.querySelectorAll('*').forEach(el => {
+            el.style.color = getQueryParam('color');
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            mf.value = getQueryParam('latex');
+            // mf.applyStyle({ink: getQueryParam('color')})
+
+            mf.addEventListener("change", () => {
+                AndroidBridge.onAnswerChanged(mf.getValue("plain-text"));
+            });
+        });
+
+        // 暴露API给Android调用
+        window.syncEditor = (latex) => { mf.value = latex; };
+        window.keyboardOnDismiss = () => { AndroidBridge.onAnswerChanged(mf.getValue("plain-text")); }
+
+    </script>
+</body>
+</html>

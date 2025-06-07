@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <script defer src="https://unpkg.com/mathlive"></script>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            /*background-color: transparent;*/
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+        .ML__keyboard {
+            border-radius: 8px;
+        }
+        /*math-field::part(content) { display: none; }*/
+        math-field::part(virtual-keyboard-toggle) { display: none; }
+    </style>
+</head>
+<body>
+    <math-field id="mf" style="display: block; background: transparent"></math-field>
+
+    <script>
+        const mf = document.getElementById("mf");
+
+        function getQueryParam(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        const mathField = document.querySelector('math-field');
+        mathField.style.color = getQueryParam('color');
+
+        mathField.querySelectorAll('*').forEach(el => {
+            el.style.color = getQueryParam('color');
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            mf.value = getQueryParam("latex")
+
+            mathVirtualKeyboard.layouts = "default";
+            mathVirtualKeyboard.show()
+
+            mf.focus()
+
+            mf.addEventListener("input", () => {
+                KeyboardReceiver.onKeyPressed(mf.value)
+            })
+        });
+
+    </script>
+</body>
+</html>

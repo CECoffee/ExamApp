@@ -54,7 +54,7 @@ class WrongQuestionViewModel : ViewModel() {
             _errorMessage.value = null
 
             try {
-                val response = apiService.getWrongQuestions(page, 10)
+                val response = apiService.getWrongQuestions(page, 3)
                 if (response.isSuccessful) {
                     val newQuestions = response.body() ?: emptyList()
 

@@ -79,18 +79,15 @@ fun WrongQuestionScreen(
         }
     }
 
-    if (doSimilarQuestions) {
-        if (similarQuestionIds.isNotEmpty()) {
-            SimilarQuestionsScreen(
-                questionIdStrings = similarQuestionIds.joinToString(","),
-                onBack = {viewModel.finishPractice()}
-            )
-        } else {
-            Toast.makeText(context, "题目列表为空", Toast.LENGTH_SHORT).show()
-            viewModel.finishPractice()
-        }
+    if (doSimilarQuestions ＆& similarQuestionIds.isNotEmpty()) {
+        SimilarQuestionsScreen(
+            questionIdStrings = similarQuestionIds.joinToString(","),
+            onBack = {viewModel.finishPractice()}
+        )
+    } else {
+        Toast.makeText(context, "题目列表为空", Toast.LENGTH_SHORT).show()
+        viewModel.finishPractice()
     }
-
 
     if (showDialog && errorMessage == null) {
         Dialog(

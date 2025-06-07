@@ -12,6 +12,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FractionalThreshold
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.RemoveCircle
 import androidx.compose.material.rememberSwipeableState
@@ -83,7 +84,7 @@ fun WrongQuestionScreen(
             QuestionCard(
                 question = questionDetail,
                 isLoading = false,
-                userAnswer = "",
+                userAnswer = questionDetail?.myAnswer?: "",
                 onAnswerChanged = {},
                 showExplanation = true,
                 onSubmit = null
@@ -95,7 +96,7 @@ fun WrongQuestionScreen(
         // 顶部标题
         Surface(
             color = MaterialTheme.colorScheme.surfaceVariant,
-            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+            modifier = Modifier.fillMaxWidth()
         ) {
             Column(
                 modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
@@ -291,7 +292,8 @@ fun SwipeToDeleteContainer(
                         is DeleteState.Error ->
                             Icon(Icons.Default.Error, "失败")
 
-                        is DeleteState.Success -> TODO()
+                        is DeleteState.Success ->
+                            Icon(Icons.Default.CheckCircle, "失败")
                     }
                 }
             }

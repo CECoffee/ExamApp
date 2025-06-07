@@ -13,6 +13,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import dev.coffee.examapp.model.WrongQuestion
+import dev.coffee.examapp.ui.components.latex.LatexWebview
 
 @Composable
 fun WrongQuestionCard(

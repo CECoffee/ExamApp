@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import dev.coffee.examapp.R
 import dev.coffee.examapp.ui.components.LoadingIndicator
 import dev.coffee.examapp.ui.components.QuestionCard
@@ -39,19 +40,24 @@ import dev.coffee.examapp.viewmodel.WrongQuestionViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
+import kotlin.collections.joinToString
 
 @Composable
 fun WrongQuestionScreen(
+    navController: NavController,
     viewModel: WrongQuestionViewModel = viewModel()
 ) {
     val context = LocalContext.current
     val wrongQuestions by viewModel.wrongQuestions.collectAsState()
+    val similarQuestionIds by viewModel.similarQuestionIds.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
     val showDialog by viewModel.showQuestionDialog.collectAsState()
+    val doSimilarQuestions by viewModel.doSimilarQuestions.collectAsState()
     val hasMore by viewModel.hasMore.collectAsState()
     val questionDetail by viewModel.questionDetail.collectAsState()
     val loadingDetailId by viewModel.loadingDetailId.collectAsState()
+    val loadingSimilarQuestions by viewModel.loadingSimilarQuestions.collectAsState()
 
     LaunchedEffect(Unit) {
         // TEST
@@ -63,7 +69,7 @@ fun WrongQuestionScreen(
 //        )
 //         viewModel.wrongQuestions.value = listOf(testWrongQuestion)
 
-        viewModel.refresh()
+        viewModel.loadNextPage()
     }
 
     LaunchedEffect(errorMessage) {
@@ -73,6 +79,19 @@ fun WrongQuestionScreen(
         }
     }
 
+    if (doSimilarQuestions) {
+        if (similarQuestionIds.isNotEmpty()) {
+            SimilarQuestionsScreen(
+                questionIdStrings = similarQuestionIds.joinToString(","),
+                onBack = {viewModel.finishPractice()}
+            )
+        } else {
+            Toast.makeText(context, "题目列表为空", Toast.LENGTH_SHORT).show()
+            viewModel.finishPractice()
+        }
+    }
+
+
     if (showDialog && errorMessage == null) {
         Dialog(
             onDismissRequest = { viewModel.closeQuestionDialog() },
@@ -81,14 +100,38 @@ fun WrongQuestionScreen(
                 dismissOnClickOutside = true
             )
         ) {
-            QuestionCard(
-                question = questionDetail,
-                isLoading = false,
-                userAnswer = questionDetail?.myAnswer?: "",
-                onAnswerChanged = {},
-                showExplanation = true,
-                onSubmit = null
-            )
+            Column(
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .padding(8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                QuestionCard(
+                    question = questionDetail,
+                    isLoading = false,
+                    userAnswer = questionDetail?.myAnswer?: "",
+                    onAnswerChanged = {},
+                    showExplanation = true,
+                    onSubmit = null
+                )
+                Button(
+                    onClick = { viewModel.getSimilarQuestionIds(questionDetail?.id!!) },
+                    enabled = !loadingSimilarQuestions,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    )
+                ) {
+                    if (loadingSimilarQuestions) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp)
+                        )
+                    } else { Text("同类题目练习") }
+                }
+            }
+
         }
     }
 
@@ -99,7 +142,9 @@ fun WrongQuestionScreen(
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
             ) {
                 Text(
                     text = stringResource(R.string.wrong_questions_title),
@@ -112,15 +157,6 @@ fun WrongQuestionScreen(
                 )
             }
         }
-
-        // 错误信息
-//        errorMessage?.let { message ->
-//            Text(
-//                text = message,
-//                color = MaterialTheme.colorScheme.error,
-//                modifier = Modifier.padding(horizontal = 16.dp)
-//            )
-//        }
 
         // 加载状态
         if (isLoading && wrongQuestions.isEmpty()) {

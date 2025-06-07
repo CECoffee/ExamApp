@@ -211,7 +211,7 @@ fun PracticeHeader(practice: Practice) {
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "已完成 ${progress}",
+            text = "已完成 ${(progress*100).toInt()}%",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurface
         )
@@ -227,7 +227,6 @@ fun ChapterItem(chapter: Chapter, onClick: () -> Unit) {
             .clickable(onClick = onClick),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        val progress = (chapter.completedCount.toFloat()/chapter.questionCount.toFloat())
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -239,14 +238,10 @@ fun ChapterItem(chapter: Chapter, onClick: () -> Unit) {
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
                 )
-                Text(
-                    text = "${(progress * 100).toInt()}%",
-                    color = MaterialTheme.colorScheme.primary
-                )
             }
             Spacer(modifier = Modifier.height(8.dp))
             LinearProgressIndicator(
-                progress = { progress },
+                progress = { chapter.progress.toFloat() },
                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(6.dp)
@@ -257,7 +252,7 @@ fun ChapterItem(chapter: Chapter, onClick: () -> Unit) {
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "已完成 ${chapter.completedCount}/${chapter.questionCount}",
+                text = "掌握程度 ${(chapter.progress * 100).toInt()}%",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
             )

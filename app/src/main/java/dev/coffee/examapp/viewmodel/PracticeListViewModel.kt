@@ -38,9 +38,6 @@ class PracticeListViewModel : ViewModel() {
                  } else {
                      _errorMessage.value = "加载练习列表失败: ${response.code()}"
                  }
-
-                // TEST
-                // _practices.value = mockPractices()
             } catch (e: Exception) {
                 _errorMessage.value = "错误: ${e.message}"
             } finally {
@@ -55,53 +52,6 @@ class PracticeListViewModel : ViewModel() {
 
     fun clearToast() {
         _errorMessage.value = null
-    }
-
-    private fun mockPractices(): List<Practice> {
-        return listOf(
-            Practice(
-                id = 1,
-                name = "高等数学",
-                questionCount = 200,
-                completedCount = 75,
-                chapters = listOf(
-                    Chapter("1", "函数与极限", 30, 10),
-                    Chapter("2", "导数与微分", 40, 15),
-                    Chapter("3", "积分学", 50, 20),
-                    Chapter("4", "多元函数", 40, 20),
-                    Chapter("5", "级数", 40, 10),
-                    Chapter("6", "级数", 40, 10),
-                    Chapter("7", "级数", 40, 10)
-
-                )
-            ),
-            Practice(
-                id = 2,
-                name = "线性代数",
-                questionCount = 150,
-                completedCount = 90,
-                chapters = listOf(
-                    Chapter("1", "行列式", 20, 15),
-                    Chapter("2", "矩阵", 30, 20),
-                    Chapter("3", "向量组", 40, 25),
-                    Chapter("4", "线性方程组", 30, 20),
-                    Chapter("5", "特征值与特征向量", 30, 10)
-                )
-            ),
-            Practice(
-                id = 3,
-                name = "概率统计",
-                questionCount = 180,
-                completedCount = 45,
-                chapters = listOf(
-                    Chapter("1", "随机事件", 30, 10),
-                    Chapter("2", "随机变量", 40, 15),
-                    Chapter("3", "多维随机变量", 50, 10),
-                    Chapter("4", "数字特征", 30, 5),
-                    Chapter("5", "大数定律", 30, 5)
-                )
-            )
-        )
     }
 }
 

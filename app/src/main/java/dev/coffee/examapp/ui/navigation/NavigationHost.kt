@@ -8,12 +8,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import dev.coffee.examapp.ui.screens.ServerConfigScreen
-import dev.coffee.examapp.ui.screens.exam.ExamListScreen
-import dev.coffee.examapp.ui.screens.exam.ExamResultScreen
-import dev.coffee.examapp.ui.screens.exam.ExamScreen
-import dev.coffee.examapp.ui.screens.practice.PracticeListScreen
-import dev.coffee.examapp.ui.screens.practice.PracticeScreen
-import dev.coffee.examapp.ui.screens.wrongQuestion.WrongQuestionScreen
+import dev.coffee.examapp.ui.screens.exam.*
+import dev.coffee.examapp.ui.screens.practice.*
+import dev.coffee.examapp.ui.screens.wrongQuestion.*
+import dev.coffee.examapp.ui.screens.statistic.*
 import java.net.URLDecoder
 
 @Composable
@@ -34,7 +32,10 @@ fun NavigationHost(navController: NavHostController,
             ExamListScreen(navController)
         }
         composable(Screen.WrongQuestion.route) {
-            WrongQuestionScreen()
+            WrongQuestionScreen(navController)
+        }
+        composable(Screen.Statistic.route) {
+            StatisticScreen(navController)
         }
         composable(Screen.Exam.route + "/{examId}/{duration}/{questionIds}",
             arguments = listOf(
@@ -44,9 +45,9 @@ fun NavigationHost(navController: NavHostController,
             )
         ) {
             backStackEntry ->
-            val examId = backStackEntry.arguments?.getInt("examId") ?: 0
-            val duration = backStackEntry.arguments?.getInt("duration") ?: 0
-            val questionIds = backStackEntry.arguments?.getString("questionIds") ?: ""
+                val examId = backStackEntry.arguments?.getInt("examId") ?: 0
+                val duration = backStackEntry.arguments?.getInt("duration") ?: 0
+                val questionIds = backStackEntry.arguments?.getString("questionIds") ?: ""
 
             ExamScreen(
                 examId = examId,
@@ -59,7 +60,7 @@ fun NavigationHost(navController: NavHostController,
             arguments = listOf( navArgument("score") { type = NavType.StringType } )
         ) {
             backStackEntry ->
-            val score = backStackEntry.arguments?.getString("score") ?: ""
+                val score = backStackEntry.arguments?.getString("score") ?: ""
 
             ExamResultScreen(
                 scoreString = score,
@@ -83,9 +84,6 @@ fun NavigationHost(navController: NavHostController,
                 onBack = { navController.popBackStack() }
             )
         }
-
-
-
     }
 }
 

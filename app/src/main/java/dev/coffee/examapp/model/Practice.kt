@@ -12,5 +12,6 @@ data class Chapter(
     val id: String,
     val name: String,
     val questionCount: Int,
-    val completedCount: Int
+    val completedCount: Int,
+    val progress: Double
 )

@@ -18,7 +18,7 @@ fun MainScreen() {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
 
-    val bottomBarItems = listOf(Screen.Practice, Screen.ExamList, Screen.WrongQuestion)
+    val bottomBarItems = listOf(Screen.Practice, Screen.ExamList, Screen.WrongQuestion, Screen.Statistic)
     val hideBottomBarItems = listOf(Screen.Exam.route + "/", Screen.ServerConfig.route)
     val shouldShowBottomBar = hideBottomBarItems.none { baseRoute ->
         currentDestination?.route?.startsWith(baseRoute) == true

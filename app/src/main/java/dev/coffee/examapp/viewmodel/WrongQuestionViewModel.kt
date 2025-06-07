@@ -15,6 +15,7 @@ import kotlinx.coroutines.launch
 class WrongQuestionViewModel : ViewModel() {
     private val apiService: ApiService = RetrofitClient.instance
     val wrongQuestions = MutableStateFlow<List<WrongQuestion>>(emptyList())
+    val similarQuestionIds = MutableStateFlow<List<Int>>(emptyList())
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
@@ -22,8 +23,14 @@ class WrongQuestionViewModel : ViewModel() {
     private val _loadingDetailId = MutableStateFlow<Int?>(null)
     val loadingDetailId: StateFlow<Int?> = _loadingDetailId.asStateFlow()
 
+    private val _loadingSimilarQuestions = MutableStateFlow<Boolean>(false)
+    val loadingSimilarQuestions: StateFlow<Boolean> = _loadingSimilarQuestions.asStateFlow()
+
     private val _showQuestionDialog = MutableStateFlow(false)
     val showQuestionDialog: StateFlow<Boolean> = _showQuestionDialog
+
+    private val _doSimilarQuestions = MutableStateFlow(false)
+    val doSimilarQuestions: StateFlow<Boolean> = _doSimilarQuestions
 
     private val _currentQuestionId = MutableStateFlow<Int?>(null)
 
@@ -117,6 +124,7 @@ class WrongQuestionViewModel : ViewModel() {
         }
     }
 
+
     fun viewDetail(questionId: Int) {
         _currentQuestionId.value = questionId
         getQuestionDetail(questionId)
@@ -125,6 +133,29 @@ class WrongQuestionViewModel : ViewModel() {
     fun closeQuestionDialog() {
         _showQuestionDialog.value = false
         _currentQuestionId.value = null
+    }
+
+    fun getSimilarQuestionIds(questionId: Int) {
+        viewModelScope.launch{
+            try {
+                _loadingSimilarQuestions.value = true
+                val response = apiService.getSimilarQuestionIds(questionId)
+                if (response.isSuccessful) {
+                    similarQuestionIds.value = response.body() ?: emptyList()
+                } else {
+                    _errorMessage.value = "加载考试列表失败: ${response.code()}"
+                }
+            } catch (e: Exception) {
+                _errorMessage.value = "错误: ${e.message}"
+            } finally {
+                _loadingSimilarQuestions.value = false
+                _doSimilarQuestions.value = true
+            }
+        }
+    }
+
+    fun finishPractice() {
+        _doSimilarQuestions.value = false
     }
 
     fun clearToast() {

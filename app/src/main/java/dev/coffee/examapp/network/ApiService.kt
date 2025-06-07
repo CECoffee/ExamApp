@@ -36,6 +36,9 @@ interface ApiService {
         @Query("limit") limit: Int = 10
     ): Response<List<WrongQuestion>>
 
+    @GET("wrong-questions/ai/{id}")
+    suspend fun getSimilarQuestionIds( @Path("id") questionId: Int): Response<List<Int>>
+
     @DELETE("wrong-questions/{id}")
     suspend fun deleteWrongQuestion( @Path("id") questionId: Int ): Response<Unit>
 

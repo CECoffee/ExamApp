@@ -46,7 +46,7 @@
             mf.focus()
 
             mf.addEventListener("input", () => {
-                KeyboardReceiver.onKeyPressed(mf.value)
+                KeyboardReceiver.onKeyPressed(mf.getValue("latex-without-placeholders"))
             })
         });
 

@@ -51,13 +51,13 @@
             // mf.applyStyle({ink: getQueryParam('color')})
 
             mf.addEventListener("change", () => {
-                AndroidBridge.onAnswerChanged(mf.getValue("plain-text"));
+                AndroidBridge.onAnswerChanged(mf.getValue("latex-without-placeholders"));
             });
         });
 
         // 暴露API给Android调用
         window.syncEditor = (latex) => { mf.value = latex; };
-        window.keyboardOnDismiss = () => { AndroidBridge.onAnswerChanged(mf.getValue("plain-text")); }
+        window.keyboardOnDismiss = () => { AndroidBridge.onAnswerChanged(mf.getValue("latex-without-placeholders")); }
 
     </script>
 </body>

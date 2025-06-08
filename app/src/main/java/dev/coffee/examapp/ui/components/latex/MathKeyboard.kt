@@ -3,6 +3,8 @@ package dev.coffee.examapp.ui.components.latex
 import android.annotation.SuppressLint
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -37,7 +39,7 @@ fun MathKeyboard(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = modalState,
-        containerColor = Color.Transparent,
+        containerColor = MaterialTheme.colorScheme.surfaceVariant,
         scrimColor = Color.Transparent,
         content = {
             Surface(
@@ -46,9 +48,18 @@ fun MathKeyboard(
                     .wrapContentHeight(),
                 color = Color.Transparent
             ) {
-                KeyboardWebView(onKeyPress, currentLatex?: "", textColor)
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    KeyboardWebView(onKeyPress, currentLatex?: "", textColor)
+                    Spacer(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(16.dp)
+                            .background(Color(0xFF151515))
+                    )
+                }
             }
-            Spacer(modifier = modifier.height(16.dp))
         }
     )
 }

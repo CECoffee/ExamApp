@@ -29,12 +29,17 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import dev.coffee.examapp.R
 import dev.coffee.examapp.ui.components.LoadingIndicator
 import dev.coffee.examapp.ui.components.QuestionCard
 import dev.coffee.examapp.ui.components.WrongQuestionCard
+import dev.coffee.examapp.ui.navigation.Screen
 import dev.coffee.examapp.ui.theme.ErrorColor
 import dev.coffee.examapp.viewmodel.WrongQuestionViewModel
 import kotlinx.coroutines.delay
@@ -53,23 +58,25 @@ fun WrongQuestionScreen(
     val isLoading by viewModel.isLoading.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
     val showDialog by viewModel.showQuestionDialog.collectAsState()
-    val doSimilarQuestions by viewModel.doSimilarQuestions.collectAsState()
     val hasMore by viewModel.hasMore.collectAsState()
     val questionDetail by viewModel.questionDetail.collectAsState()
     val loadingDetailId by viewModel.loadingDetailId.collectAsState()
     val loadingSimilarQuestions by viewModel.loadingSimilarQuestions.collectAsState()
+    val startPractice by viewModel.startPractice.collectAsState()
 
-    LaunchedEffect(Unit) {
-        // TEST
-//        val testWrongQuestion = WrongQuestion(
-//            questionId = 1,
-//            content = "这是测试题目内容",
-//            myAnswer = "B",
-//            correctAnswer = "A"
-//        )
-//         viewModel.wrongQuestions.value = listOf(testWrongQuestion)
-
-        viewModel.loadNextPage()
+    // 离开页面时清空缓存防止渲染崩溃
+    val lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.refresh()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            viewModel.clearCache()
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
     }
 
     LaunchedEffect(errorMessage) {
@@ -79,14 +86,9 @@ fun WrongQuestionScreen(
         }
     }
 
-    if (doSimilarQuestions ＆& similarQuestionIds.isNotEmpty()) {
-        SimilarQuestionsScreen(
-            questionIdStrings = similarQuestionIds.joinToString(","),
-            onBack = {viewModel.finishPractice()}
-        )
-    } else {
-        Toast.makeText(context, "题目列表为空", Toast.LENGTH_SHORT).show()
-        viewModel.finishPractice()
+    if (startPractice) {
+        navController.navigate(Screen.SimilarQuestions.route + "/${similarQuestionIds.joinToString(",")}")
+        viewModel.closeQuestionDialog()
     }
 
     if (showDialog && errorMessage == null) {
@@ -108,8 +110,7 @@ fun WrongQuestionScreen(
                     isLoading = false,
                     userAnswer = questionDetail?.myAnswer?: "",
                     onAnswerChanged = {},
-                    showExplanation = true,
-                    onSubmit = null
+                    showExplanation = true
                 )
                 Button(
                     onClick = { viewModel.getSimilarQuestionIds(questionDetail?.id!!) },
@@ -125,7 +126,7 @@ fun WrongQuestionScreen(
                         CircularProgressIndicator(
                             modifier = Modifier.size(20.dp)
                         )
-                    } else { Text("同类题目练习") }
+                    } else { Text("AI同类错题推荐") }
                 }
             }
 

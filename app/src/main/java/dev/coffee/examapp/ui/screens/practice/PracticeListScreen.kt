@@ -44,6 +44,7 @@ import androidx.navigation.NavController
 import dev.coffee.examapp.model.Chapter
 import dev.coffee.examapp.model.Practice
 import dev.coffee.examapp.ui.components.LoadingIndicator
+import dev.coffee.examapp.ui.navigation.Screen
 import dev.coffee.examapp.viewmodel.PracticeListViewModel
 import java.net.URLEncoder
 
@@ -174,7 +175,7 @@ fun PracticeListScreen(
                     ChapterItem(
                         chapter = chapter,
                         onClick = {
-                            navController.navigate("practice/${chapter.id}/${URLEncoder.encode(chapter.name, "utf-8")}")
+                            navController.navigate(Screen.Practice.route + "/${chapter.id}/${chapter.name}")
                         }
                     )
                 }

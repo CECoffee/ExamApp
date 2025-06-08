@@ -59,7 +59,7 @@ class PracticeViewModel(
 
     fun proceedToNextQuestion() {
         if (_nextQuestion.value?.id != 0) {
-            _currentQuestionIndex.value++
+            _currentQuestionIndex.value ++
         } else {
             _showToast.value = "本章节题库已空"
             _practiceFinished.value = true
@@ -105,7 +105,7 @@ class PracticeViewModel(
 
                  if (response.isSuccessful) {
                      if (_isCorrect.value) {
-                         _correctCount.value++
+                         _correctCount.value ++
                      }
                      _currentQuestion.value = _currentQuestion.value?.copy(isCorrect = _isCorrect.value)
                      _showExplanation.value = true
@@ -114,19 +114,6 @@ class PracticeViewModel(
                  } else {
                      _showToast.value = "提交答案失败: ${response.code()}"
                  }
-
-                // TEST
-//                val isCorrect = Random.nextBoolean()
-//                if (isCorrect) {
-//                    _correctCount.value++
-//                }
-//                _currentQuestion.value = _currentQuestion.value?.copy(
-//                    explanation = mockExplanation(
-//                        questionId = _currentQuestion.value?.id ?: 0,
-//                        isCorrect = isCorrect
-//                    )
-//                )
-//                _showExplanation.value = true
             } catch (e: Exception) {
                 _showToast.value = "失败: ${e.message}"
             } finally {
@@ -155,41 +142,7 @@ class PracticeViewModel(
         }
     }
 
-
     fun clearToast() {
         _showToast.value = null
-    }
-
-    private fun mockQuestion(id: Int, chapterId: Int): Question {
-        val chapterTopics = mapOf(
-            1 to listOf("函数", "极限", "连续性"),
-            2 to listOf("导数", "微分", "中值定理"),
-            3 to listOf("不定积分", "定积分", "微积分基本定理")
-        )
-
-        val topics = chapterTopics[chapterId] ?: listOf("默认主题")
-        val topic = topics.random()
-
-        return Question(
-            id = id,
-            difficulty = (1..3).random(),
-            content = "关于${topic}的问题：${listOf(
-                "请解释${topic}的概念",
-                "写出${topic}的基本公式",
-                "说明${topic}在实际中的应用"
-            ).random()}",
-            questionType = QuestionType.FILL_IN_THE_BLANK,
-            correctAnswer = "这是关于${topic}的正确答案示例",
-            explanation = ""
-        )
-    }
-
-    private fun mockExplanation(questionId: Int, isCorrect: Boolean): String {
-        return if (isCorrect) {
-            "恭喜你答对了！这是关于第${questionId}题的详细解析，你的答案完全正确。"
-        } else {
-            "正确答案是：${currentQuestion.value?.correctAnswer}\n\n" +
-                    "解析：这是关于第${questionId}题的详细解析，你的答案不完全正确，建议复习相关知识点。"
-        }
     }
 }

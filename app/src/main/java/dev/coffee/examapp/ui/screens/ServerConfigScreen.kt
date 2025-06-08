@@ -103,6 +103,7 @@ fun ServerConfigScreen(navController: NavController) {
                                 val result = setBaseUrl(serverAddress)
                                 isLoading = false
                                 if (result) {
+                                    navController.graph.setStartDestination(Screen.ExamList.route)
                                     navController.navigate(Screen.ExamList.route) {
                                         popUpTo(Screen.ServerConfig.route) {
                                             inclusive = true

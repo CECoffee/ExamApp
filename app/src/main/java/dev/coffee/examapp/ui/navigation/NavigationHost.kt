@@ -8,11 +8,14 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import dev.coffee.examapp.ui.screens.ServerConfigScreen
-import dev.coffee.examapp.ui.screens.exam.*
-import dev.coffee.examapp.ui.screens.practice.*
-import dev.coffee.examapp.ui.screens.wrongQuestion.*
-import dev.coffee.examapp.ui.screens.statistic.*
-import java.net.URLDecoder
+import dev.coffee.examapp.ui.screens.exam.ExamListScreen
+import dev.coffee.examapp.ui.screens.exam.ExamResultScreen
+import dev.coffee.examapp.ui.screens.exam.ExamScreen
+import dev.coffee.examapp.ui.screens.practice.PracticeListScreen
+import dev.coffee.examapp.ui.screens.practice.PracticeScreen
+import dev.coffee.examapp.ui.screens.statistic.StatisticScreen
+import dev.coffee.examapp.ui.screens.wrongQuestion.SimilarQuestionsScreen
+import dev.coffee.examapp.ui.screens.wrongQuestion.WrongQuestionScreen
 
 @Composable
 fun NavigationHost(navController: NavHostController,
@@ -67,20 +70,32 @@ fun NavigationHost(navController: NavHostController,
                 onBack = { navController.popBackStack() }
             )
         }
-
-        composable("practice/{chapterId}/{chapterName}") { backStackEntry ->
-            val chapterId = URLDecoder.decode(
-                backStackEntry.arguments?.getString("chapterId") ?: "",
-                "utf-8"
+        composable(Screen.Practice.route + "/{chapterId}/{chapterName}",
+            arguments = listOf(
+                navArgument("chapterId") {type = NavType.StringType},
+                navArgument("chapterName") {type = NavType.StringType}
             )
-            val chapterName = URLDecoder.decode(
-                backStackEntry.arguments?.getString("chapterName") ?: "",
-                "utf-8"
-            )
+        ) {
+            backStackEntry ->
+                val chapterId = backStackEntry.arguments?.getString("chapterId") ?: ""
+                val chapterName = backStackEntry.arguments?.getString("chapterName") ?: ""
 
             PracticeScreen(
                 chapterId = chapterId,
                 chapterName = chapterName,
+                onBack = { navController.popBackStack() }
+            )
+        }
+        composable(Screen.SimilarQuestions.route + "/{questionIds}",
+            arguments = listOf(
+                navArgument("questionIds") { type = NavType.StringType }
+            )
+        ) {
+            backStackEntry ->
+                val questionIds = backStackEntry.arguments?.getString("questionIds") ?: ""
+
+            SimilarQuestionsScreen(
+                questionIdStrings = questionIds,
                 onBack = { navController.popBackStack() }
             )
         }

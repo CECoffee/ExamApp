@@ -36,8 +36,7 @@ fun QuestionCard(
     isLoading: Boolean,
     userAnswer: String,
     onAnswerChanged: (String) -> Unit,
-    showExplanation: Boolean,
-    onSubmit: (() -> Unit)? = null
+    showExplanation: Boolean
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -97,8 +96,8 @@ fun QuestionCard(
                 )
 
                 if (showExplanation) {
-                    val resultColor = if (question.isCorrect == true) Color(0xFF4CAF50) else Color(0xFFF44336)
-                    val resultText = if (question.isCorrect == true) "回答正确" else "回答错误"
+                    val resultColor = if (question.correctAnswer == userAnswer) Color(0xFF4CAF50) else Color(0xFFF44336)
+                    val resultText = if (question.correctAnswer == userAnswer) "回答正确" else "回答错误"
 
                     Text(
                         text = resultText,
@@ -136,34 +135,13 @@ fun QuestionCard(
                         fontWeight = FontWeight.Bold
                     )
 
-                    question.correctAnswer?.let {
-                        LatexWebview(
-                            latex = it,
-                            modifier = Modifier
-                                .padding(bottom = 16.dp)
-                                .background(Color.Transparent)
-                        )
-                    }
-
-                } else {
-                    /*TextField(
-                        value = userAnswer,
-                        onValueChange = onAnswerChanged,
+                    LatexWebview(
+                        latex = question.explanation,
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .height(120.dp),
-                        placeholder = { Text("在此输入你的答案") },
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = Color.Transparent,
-                            unfocusedContainerColor = Color.Transparent,
-                            focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                            unfocusedIndicatorColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                        ),
-                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                        keyboardActions = KeyboardActions(
-                            onDone = { onSubmit?.invoke() }
-                        )
-                    )*/
+                            .padding(bottom = 16.dp)
+                            .background(Color.Transparent)
+                    )
+                } else {
                     MathLiveEditor(
                         initialLatex = userAnswer,
                         onAnswerChanged = { newLatex ->

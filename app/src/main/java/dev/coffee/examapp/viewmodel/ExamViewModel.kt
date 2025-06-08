@@ -77,24 +77,10 @@ class ExamViewModel(
                 if (response.isSuccessful) {
                     _currentQuestion.value = response.body()
                 } else {
-                    _errorMessage.value = "加载考试列表失败: ${response.code()}"
+                    _errorMessage.value = "加载题目失败: ${response.code()}"
                 }
-
-                // 模拟获取题目数据
-//                val question = Question(
-//                    id = questionId,
-//                    difficulty = when (questionId % 3) {
-//                        0 -> 1
-//                        1 -> 2
-//                        else -> 3
-//                    },
-//                    content = "请解释以下概念：${listOf("量子纠缠", "人工智能", "区块链", "大数据", "云计算")[questionId % 5]}",
-//                    questionType = QuestionType.SHORT_ANSWER,
-//                    correctAnswer = "这是正确答案的示例文本，用于展示在预览中"
-//                )
-
             } catch (e: Exception) {
-                // 处理错误
+                _errorMessage.value = "失败: ${e.message}"
             } finally {
                 _isLoading.value = false
             }

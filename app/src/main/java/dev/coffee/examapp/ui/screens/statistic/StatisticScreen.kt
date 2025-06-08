@@ -3,38 +3,17 @@ package dev.coffee.examapp.ui.screens.statistic
 import android.graphics.Paint
 import android.icu.text.SimpleDateFormat
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.Divider
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Assignment
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.material.icons.automirrored.outlined.Assignment
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -53,8 +32,7 @@ import dev.coffee.examapp.R
 import dev.coffee.examapp.model.Exam
 import dev.coffee.examapp.model.ExamStatus
 import dev.coffee.examapp.viewmodel.ExamListViewModel
-import java.util.Date
-import java.util.Locale
+import java.util.*
 import kotlin.math.max
 
 @Composable
@@ -62,28 +40,22 @@ fun StatisticScreen(
     navController: NavController,
     viewModel: ExamListViewModel = viewModel()
 ) {
-    // 状态收集
     val isLoading by viewModel.isLoading.collectAsState()
     val allExams by viewModel.exams.collectAsState()
     val primaryColor = MaterialTheme.colorScheme.primary
     val surfaceVariant = MaterialTheme.colorScheme.surfaceVariant
     val onSurface = MaterialTheme.colorScheme.onSurface
-    // 分页配置
-    val pageSize = 5 // 每页显示数量
-    val visibleItemCount = remember { mutableStateOf(pageSize) } // 当前显示数量
+    val pageSize = 5
+    val visibleItemCount = remember { mutableIntStateOf(pageSize) }
 
-    // 加载更多函数（每次增加pageSize条）
-    val loadMore = { visibleItemCount.value += pageSize }
+    val loadMore = { visibleItemCount.intValue += pageSize }
 
-    // 数据过滤和排序
     val validExams = remember(allExams) {
         allExams
             .filter { it.status == ExamStatus.COMPLETED && it.score != null }
             .sortedBy { it.endTime }
     }
 
-
-    // 加载数据
     LaunchedEffect(Unit) {
         if (allExams.isEmpty()) {
             viewModel.loadExams(ExamStatus.COMPLETED)
@@ -91,16 +63,15 @@ fun StatisticScreen(
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        // 顶部标题 - 移到条件判断之前
         Surface(
             color = MaterialTheme.colorScheme.surfaceVariant,
             modifier = Modifier.fillMaxWidth()
         ) {
             Box(
-                contentAlignment = Alignment.Center,  // 关键点：设置Box内容居中
+                contentAlignment = Alignment.Center,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 16.dp)  // 调整垂直间距
+                    .padding(vertical = 16.dp)
             ) {
                 Text(
                     text = stringResource(R.string.ability_curve),
@@ -134,7 +105,7 @@ fun StatisticScreen(
 
                 ExamRecordsSection(
                     exams = validExams,
-                    visibleItemCount = visibleItemCount.value,
+                    visibleItemCount = visibleItemCount.intValue,
                     onLoadMore = loadMore
                 )
             }
@@ -155,7 +126,7 @@ private fun EmptyStatisticsView() {
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Icon(
-                imageVector = Icons.Outlined.Assignment,
+                imageVector = Icons.AutoMirrored.Outlined.Assignment,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
                 modifier = Modifier.size(48.dp)
@@ -193,7 +164,8 @@ private fun ScoreTrendChart(
         modifier = Modifier
             .fillMaxWidth()
             .height(300.dp),
-        elevation = 4.dp, // 保持阴影
+        elevation = 4.dp,
+        backgroundColor = surfaceColor,
         shape = RoundedCornerShape(8.dp)
     ) {
         Box(
@@ -201,12 +173,11 @@ private fun ScoreTrendChart(
                 .fillMaxSize()
                 .padding(8.dp)
         ) {
-            Canvas(modifier = Modifier.fillMaxSize()) {
+            Canvas(modifier = Modifier.fillMaxSize().background(surfaceColor)) {
                 val canvasWidth = size.width
                 val canvasHeight = size.height
                 val padding = 40.dp.toPx()
 
-                // 绘制坐标轴
                 drawLine(
                     color = Color.Gray,
                     start = Offset(padding, canvasHeight - padding),
@@ -284,59 +255,54 @@ private fun ExamRecordsSection(
     visibleItemCount: Int,
     onLoadMore: () -> Unit
 ) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 56.dp)
+            .padding(horizontal = 8.dp)
+    ) {
+        Text(
+            text = "考试记录 ",
+            style = MaterialTheme.typography.titleMedium.copy(
+                fontWeight = FontWeight.SemiBold
+            ),
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
 
-        Column(
+        LazyColumn(
             modifier = Modifier
-                .fillMaxWidth()// 保持内边距
                 .fillMaxWidth()
-                .padding(bottom = 56.dp)
-                .padding(horizontal = 8.dp)
+                .heightIn(min = 120.dp, max = 400.dp)
         ) {
-            // 保持原有标题样式
-            Text(
-                text = "考试记录 ",
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontWeight = FontWeight.SemiBold
-                ),
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
+            items(exams.take(visibleItemCount)) { exam ->
+                ExamScoreItem(exam = exam)
+                Divider(
+                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
+                    thickness = 0.8.dp,
+                    modifier = Modifier.padding(vertical = 6.dp)
+                )
+            }
 
-            // 改为自适应高度的LazyColumn
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = 120.dp, max = 400.dp) // 弹性高度范围
-            ) {
-                items(exams.take(visibleItemCount)) { exam ->
-                    ExamScoreItem(exam = exam)
-                    Divider(
-                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
-                        thickness = 0.8.dp,
-                        modifier = Modifier.padding(vertical = 6.dp)
-                    )
-                }
-
-                if (exams.size > visibleItemCount) {
-                    item {
-                        Button(
-                            onClick = onLoadMore,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding( vertical = 8.dp),
-                            shape = RoundedCornerShape(8.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        ) {
-                            Text("加载更多...")
-                        }
+            if (exams.size > visibleItemCount) {
+                item {
+                    Button(
+                        onClick = onLoadMore,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding( vertical = 8.dp),
+                        shape = RoundedCornerShape(8.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    ) {
+                        Text("加载更多...")
                     }
                 }
             }
         }
-
+    }
 }
 
 @Composable
@@ -370,6 +336,4 @@ private fun ExamScoreItem(exam: Exam) {
             fontWeight = FontWeight.Bold
         )
     }
-
 }
-

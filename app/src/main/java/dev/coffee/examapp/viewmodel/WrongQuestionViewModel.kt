@@ -23,14 +23,13 @@ class WrongQuestionViewModel : ViewModel() {
     private val _loadingDetailId = MutableStateFlow<Int?>(null)
     val loadingDetailId: StateFlow<Int?> = _loadingDetailId.asStateFlow()
 
-    private val _loadingSimilarQuestions = MutableStateFlow<Boolean>(false)
+    private val _loadingSimilarQuestions = MutableStateFlow(false)
     val loadingSimilarQuestions: StateFlow<Boolean> = _loadingSimilarQuestions.asStateFlow()
+
+    var startPractice = MutableStateFlow(false)
 
     private val _showQuestionDialog = MutableStateFlow(false)
     val showQuestionDialog: StateFlow<Boolean> = _showQuestionDialog
-
-    private val _doSimilarQuestions = MutableStateFlow(false)
-    val doSimilarQuestions: StateFlow<Boolean> = _doSimilarQuestions
 
     private val _currentQuestionId = MutableStateFlow<Int?>(null)
 
@@ -88,6 +87,8 @@ class WrongQuestionViewModel : ViewModel() {
         loadWrongQuestions(1)
     }
 
+    fun clearCache() { wrongQuestions.value = emptyList() }
+
     fun loadNextPage() {
         if (!isLoading.value && hasMore.value) {
             loadWrongQuestions(currentPage.value + 1)
@@ -132,13 +133,14 @@ class WrongQuestionViewModel : ViewModel() {
 
     fun closeQuestionDialog() {
         _showQuestionDialog.value = false
+        startPractice.value = false
         _currentQuestionId.value = null
     }
 
     fun getSimilarQuestionIds(questionId: Int) {
         viewModelScope.launch{
+            _loadingSimilarQuestions.value = true
             try {
-                _loadingSimilarQuestions.value = true
                 val response = apiService.getSimilarQuestionIds(questionId)
                 if (response.isSuccessful) {
                     similarQuestionIds.value = response.body() ?: emptyList()
@@ -149,13 +151,9 @@ class WrongQuestionViewModel : ViewModel() {
                 _errorMessage.value = "错误: ${e.message}"
             } finally {
                 _loadingSimilarQuestions.value = false
-                _doSimilarQuestions.value = true
+                startPractice.value = similarQuestionIds.value.isNotEmpty()
             }
         }
-    }
-
-    fun finishPractice() {
-        _doSimilarQuestions.value = false
     }
 
     fun clearToast() {

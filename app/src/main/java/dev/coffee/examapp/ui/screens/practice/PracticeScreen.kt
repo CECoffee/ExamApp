@@ -97,8 +97,7 @@ fun PracticeScreen(
             isLoading = isLoading,
             userAnswer = userAnswer,
             onAnswerChanged = { viewModel.updateUserAnswer(it) },
-            showExplanation = showExplanation,
-            onSubmit = { viewModel.submitAnswer() }
+            showExplanation = showExplanation
         )
 
         Spacer(modifier = Modifier.weight(1f))
@@ -112,11 +111,7 @@ fun PracticeScreen(
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary
                 )
-            ) {
-                Text(
-                    text = if (currentIndex < viewModel.totalQuestions - 1) "下一题" else "完成练习"
-                )
-            }
+            ) { Text( text = if (currentIndex < viewModel.totalQuestions - 1) "下一题" else "完成练习" ) }
         } else {
             Button(
                 onClick = { viewModel.submitAnswer() },
@@ -129,14 +124,8 @@ fun PracticeScreen(
                 )
             ) {
                 if (isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp)
-                    )
-                } else {
-                    Text(
-                        text = "提交答案"
-                    )
-                }
+                    CircularProgressIndicator( modifier = Modifier.size(20.dp) )
+                } else { Text( text = "提交答案" ) }
             }
         }
     }

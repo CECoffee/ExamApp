@@ -44,9 +44,8 @@ fun ExamScreen(
             }
         }
     )
-
-    // 处理Toast显示
     val toastMessage by viewModel.showToast.collectAsState()
+
     LaunchedEffect(toastMessage) {
         toastMessage?.let {
             Toast.makeText(context, it, Toast.LENGTH_LONG).show()
@@ -61,8 +60,8 @@ fun ExamScreen(
     val isLoading by viewModel.isLoading.collectAsState()
     val userAnswer by viewModel.userAnswer.collectAsState()
     val examFinished by viewModel.examFinished.collectAsState()
-
     var showExitConfirmation by remember { mutableStateOf(false) }
+
     BackHandler(enabled = true) {
         if (examFinished) {
             onBack()
@@ -116,8 +115,7 @@ fun ExamScreen(
         ExamHeader(
             remainingTime = remainingTime,
             currentIndex = currentIndex,
-            totalQuestions = questionIds.size,
-            score = score
+            totalQuestions = questionIds.size
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -149,8 +147,7 @@ fun ExamScreen(
 fun ExamHeader(
     remainingTime: Int,
     currentIndex: Int,
-    totalQuestions: Int,
-    score: Double
+    totalQuestions: Int
 ) {
     val minutes = remainingTime / 60
     val seconds = remainingTime % 60

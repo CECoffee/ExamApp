@@ -123,9 +123,12 @@ fun WrongQuestionScreen(
                     )
                 ) {
                     if (loadingSimilarQuestions) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(20.dp)
-                        )
+                        Row {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Text("等待AI返回")
+                        }
                     } else { Text("AI同类错题推荐") }
                 }
             }

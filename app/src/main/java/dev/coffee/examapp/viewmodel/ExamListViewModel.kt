@@ -10,10 +10,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import org.jetbrains.annotations.VisibleForTesting
 import java.util.Date
 
-class ExamListViewModel : ViewModel() {
-    private val apiService: ApiService = RetrofitClient.instance
+class ExamListViewModel ( val apiService: ApiService = RetrofitClient.instance): ViewModel() {
 
     private val _exams = MutableStateFlow<List<Exam>>(emptyList())
     val exams: StateFlow<List<Exam>> = _exams.asStateFlow()
@@ -164,4 +164,17 @@ class ExamListViewModel : ViewModel() {
     fun clearToast() {
         _errorMessage.value = null
     }
+
+// ExamListViewModel.kt
+
+    @VisibleForTesting
+    fun setExamsForTest(exams: List<Exam>) {
+        _exams.value = exams
+    }
+
+    @VisibleForTesting
+    fun setErrorMessageForTest(message: String?) {
+        _errorMessage.value = message
+    }
+
 }

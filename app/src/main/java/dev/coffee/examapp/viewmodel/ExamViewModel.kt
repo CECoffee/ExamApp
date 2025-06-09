@@ -149,6 +149,8 @@ class ExamViewModel(
         if (_isCorrect.value) _score.value += _scorePerQuestion
     }
 
+
+
     fun clearToast() {
         _showToast.value = null
     }

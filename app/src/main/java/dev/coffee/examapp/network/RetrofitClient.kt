@@ -11,7 +11,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
-    private var BASE_URL = "http://47.123.2.211:8080"
+    private var BASE_URL = ""
 
     private val gson = GsonBuilder()
         .setDateFormat("yyyy-MM-dd HH:mm:ss")
@@ -43,7 +43,7 @@ object RetrofitClient {
             .create(ApiService::class.java)
     }
 
-    suspend fun setBaseUrl(serverAddress: String): Boolean {
+     suspend fun setBaseUrl(serverAddress: String): Boolean {
         BASE_URL = if (serverAddress.endsWith('/')) serverAddress else "$serverAddress/"
         return try {
             val request = Request.Builder()

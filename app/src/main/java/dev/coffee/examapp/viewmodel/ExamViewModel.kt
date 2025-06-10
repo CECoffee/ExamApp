@@ -1,6 +1,5 @@
 package dev.coffee.examapp.viewmodel
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.coffee.examapp.model.Question
@@ -18,10 +17,9 @@ import kotlin.let
 class ExamViewModel(
     private val examId: Int,
     totalTimeSeconds: Int,
-    private val questionIds: List<Int>
-) : ViewModel() {
+    private val questionIds: List<Int>,
     private val apiService: ApiService = RetrofitClient.instance
-
+) : ViewModel() {
     private val _scorePerQuestion = 100 / questionIds.size
 
     private var _remainingTime = MutableStateFlow(totalTimeSeconds)
@@ -88,18 +86,17 @@ class ExamViewModel(
     }
 
     fun updateAnswer(answer: String) {
+        _userAnswer.value = answer
         currentQuestion.value?.let { question ->
-            _userAnswer.value = answer
             _currentQuestion.value = question.copy(myAnswer = answer)
         }
     }
 
-    fun navigateToNext(context: Context) {
+    fun navigateToNext() {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                submitCurrentAnswer(context) // 提交当前答案
-                // 只有提交成功才继续
+                submitCurrentAnswer()
                 val nextIndex = _currentQuestionIndex.value + 1
                 if (nextIndex < questionIds.size) {
                     _currentQuestionIndex.value = nextIndex
@@ -113,11 +110,11 @@ class ExamViewModel(
         }
     }
 
-    fun navigateToPrevious(context: Context) {
+    fun navigateToPrevious() {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                submitCurrentAnswer(context)
+                submitCurrentAnswer()
                 val prevIndex = _currentQuestionIndex.value - 1
                 if (prevIndex >= 0) {
                     _currentQuestionIndex.value = prevIndex
@@ -129,7 +126,7 @@ class ExamViewModel(
         }
     }
 
-    private suspend fun submitCurrentAnswer(context: Context) {
+    private suspend fun submitCurrentAnswer() {
         currentQuestion.value?.let { question ->
             _userAnswer.value.let { answer ->
                 try {
@@ -148,7 +145,6 @@ class ExamViewModel(
     private fun calculateScore() {
         if (_isCorrect.value) _score.value += _scorePerQuestion
     }
-
 
 
     fun clearToast() {

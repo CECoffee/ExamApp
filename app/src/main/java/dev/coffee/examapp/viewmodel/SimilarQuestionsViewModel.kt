@@ -12,10 +12,9 @@ import kotlinx.coroutines.launch
 import kotlin.let
 
 class SimilarQuestionsViewModel(
-    private val questionIds: List<Int>
-) : ViewModel() {
+    private val questionIds: List<Int>,
     private val apiService: ApiService = RetrofitClient.instance
-
+) : ViewModel() {
     private var _currentQuestionIndex = MutableStateFlow(0)
     val currentQuestionIndex: StateFlow<Int> = _currentQuestionIndex.asStateFlow()
 

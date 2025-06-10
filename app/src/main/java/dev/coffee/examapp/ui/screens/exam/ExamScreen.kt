@@ -136,8 +136,8 @@ fun ExamScreen(
             currentIndex = currentIndex,
             totalQuestions = questionIds.size,
             isLoading = isLoading,
-            onPrevious = { viewModel.navigateToPrevious(context) },
-            onNext = { viewModel.navigateToNext(context) },
+            onPrevious = { viewModel.navigateToPrevious() },
+            onNext = { viewModel.navigateToNext() },
             onSubmit = { viewModel.finishExam() }
         )
     }

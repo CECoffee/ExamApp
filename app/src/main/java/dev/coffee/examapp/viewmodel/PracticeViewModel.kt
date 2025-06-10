@@ -3,7 +3,6 @@ package dev.coffee.examapp.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.coffee.examapp.model.Question
-import dev.coffee.examapp.model.QuestionType
 import dev.coffee.examapp.network.ApiService
 import dev.coffee.examapp.network.RetrofitClient
 import dev.coffee.examapp.network.SubmitPracticeAnswerRequest
@@ -14,11 +13,9 @@ import kotlinx.coroutines.launch
 
 class PracticeViewModel(
     private val chapterId: String,
-    private val chapterName: String
-) : ViewModel() {
+    private val chapterName: String,
     private val apiService: ApiService = RetrofitClient.instance
-
-    // Practice state
+) : ViewModel() {
     private val _currentQuestion = MutableStateFlow<Question?>(null)
     val currentQuestion: StateFlow<Question?> = _currentQuestion.asStateFlow()
 

@@ -14,6 +14,13 @@ android {
         compose = true
     }
 
+    packaging {
+        resources {
+            excludes += "/META-INF/LICENSE.md"
+            excludes += "/META-INF/LICENSE-notice.md" // 可选
+        }
+    }
+
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.15"
     }
@@ -89,8 +96,12 @@ dependencies {
     testImplementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
     testImplementation ("org.mockito.kotlin:mockito-kotlin:4.1.0")
     testImplementation ("androidx.arch.core:core-testing:2.2.0")
-    androidTestImplementation ("androidx.test.ext:junit:1.2.1")
-    androidTestImplementation ("androidx.test.espresso:espresso-core:3.6.1")
+    androidTestImplementation("org.jetbrains.kotlin:kotlin-reflect:1.9.0") // 或与项目Kotlin版本一致
+    androidTestImplementation ("io.mockk:mockk-android:1.13.4")
+    androidTestImplementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4")
+    androidTestImplementation( "androidx.arch.core:core-testing:2.2.0")
+    androidTestImplementation ("androidx.test.ext:junit:1.1.5")
+    androidTestImplementation ("androidx.test.espresso:espresso-core:3.5.0")
     androidTestImplementation ("androidx.compose.ui:ui-test-junit4:1.8.2")
     androidTestImplementation ("androidx.navigation:navigation-testing:2.9.0")
     debugImplementation ("androidx.compose.ui:ui-tooling:1.8.2")

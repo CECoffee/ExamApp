@@ -40,9 +40,6 @@ class ExamViewModel(
     private var _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
-    private var _showToast = MutableStateFlow<String?>(null)
-    val showToast: StateFlow<String?> = _showToast.asStateFlow()
-
     private var _examFinished = MutableStateFlow(false)
     val examFinished: StateFlow<Boolean> = _examFinished.asStateFlow()
 
@@ -104,6 +101,8 @@ class ExamViewModel(
                 } else {
                     finishExam()
                 }
+            } catch (e: Exception) {
+                _errorMessage.value = e.message
             } finally {
                 _isLoading.value = false
             }
@@ -135,7 +134,7 @@ class ExamViewModel(
                     apiService.submitExamAnswer(question.id, SubmitAnswerRequest(answer, _isCorrect.value))
                     _userAnswer.value = ""
                 } catch (e: Exception) {
-                    _showToast.value = "答案提交失败: ${e.message}"
+                    _errorMessage.value = "答案提交失败: ${e.message}"
                     throw e
                 }
             }
@@ -148,7 +147,7 @@ class ExamViewModel(
 
 
     fun clearToast() {
-        _showToast.value = null
+        _errorMessage.value = null
     }
 
     fun finishExam() {
@@ -158,7 +157,7 @@ class ExamViewModel(
                 apiService.submitExam(examId, ScoreRequest(score.value))
                 _examFinished.value = true
             } catch (e: Exception) {
-                _showToast.value = "考试提交失败: ${e.message}"
+                _errorMessage.value = "考试提交失败: ${e.message}"
             } finally {
                 _isLoading.value = false
             }

@@ -22,11 +22,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.coffee.examapp.model.Question
+import dev.coffee.examapp.model.QuestionType
+import dev.coffee.examapp.model.QuestionType.*
 import dev.coffee.examapp.ui.components.latex.LatexWebview
 import dev.coffee.examapp.ui.components.latex.MathLiveEditor
 
@@ -142,15 +145,25 @@ fun QuestionCard(
                             .background(Color.Transparent)
                     )
                 } else {
-                    MathLiveEditor(
-                        initialLatex = userAnswer,
-                        onAnswerChanged = { newLatex ->
-                            onAnswerChanged(newLatex)
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .wrapContentHeight()
-                    )
+                    when (question.questionType) {
+                        FILL_IN_THE_BLANK -> {
+                            MathLiveEditor(
+                                initialLatex = userAnswer,
+                                onAnswerChanged = { newLatex ->
+                                    onAnswerChanged(newLatex)
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .testTag("fill_blank_input")
+                                    .wrapContentHeight()
+                            )
+                        }
+
+                        SINGLE_CHOICE -> TODO()
+                        MULTIPLE_CHOICE -> TODO()
+                        TRUE_FALSE -> TODO()
+                        SHORT_ANSWER -> TODO()
+                    }
                 }
             } else {
                 Text(

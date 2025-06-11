@@ -32,8 +32,7 @@ class SimilarQuestionsViewModelTest {
             id = 101,
             difficulty = 1,
             content = "1+1等于几？",
-            questionType = QuestionType.SINGLE_CHOICE,
-            options = listOf("1", "2", "3"),
+            questionType = QuestionType.FILL_IN_THE_BLANK,
             correctAnswer = "2",
             explanation = "加法基础"
         ),
@@ -41,8 +40,7 @@ class SimilarQuestionsViewModelTest {
             id = 102,
             difficulty = 2,
             content = "2+2等于几？",
-            questionType = QuestionType.SINGLE_CHOICE,
-            options = listOf("2", "3", "4"),
+            questionType = QuestionType.FILL_IN_THE_BLANK,
             correctAnswer = "4",
             explanation = "加法基础"
         )

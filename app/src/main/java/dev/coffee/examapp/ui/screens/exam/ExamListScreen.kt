@@ -127,40 +127,6 @@ fun ExamListScreen(
                 }
             }
         }
-
-        /* 测试用 */
-        val testExams = listOf(
-            Exam(
-                id = 1,
-                name = "数学考试",
-                startTime = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, 1) }.time, // 明天开始
-                endTime = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, 2) }.time,   // 后天结束
-                duration = 90,
-                status = ExamStatus.PENDING,
-                questionList = listOf(1,2,3)
-            ),
-            Exam(
-                id = 2,
-                name = "历史考试",
-                startTime = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -10) }.time, // 10天前开始
-                endTime = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -5) }.time,    // 5天前结束
-                duration = 60,
-                status = ExamStatus.COMPLETED,
-                score = 85.0,
-                questionList = listOf(2,4,5),
-            ),
-            Exam(
-                id = 3,
-                name = "物理考试",
-                startTime = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -20) }.time, // 20天前开始
-                endTime = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -15) }.time,   // 15天前结束
-                duration = 120,
-                status = ExamStatus.EXPIRED,
-                questionList = listOf(1,3,4)
-            )
-        )
-
-
         // 加载状态
         if (isLoading) {
             LoadingIndicator()
@@ -168,7 +134,6 @@ fun ExamListScreen(
             // Tab内容
             HorizontalPager(state = pagerState) { page ->
                 val filteredExams = viewModel.filterExamsByStatus(tabs[page].status)
-                // val filteredExams = testExams.filter { it.status == tabs[page].status }  // 测试用
                 ExamList(exams = filteredExams, status = tabs[page].status, navController = navController)
             }
         }

@@ -31,20 +31,21 @@ fun ExamScreen(
     examId: Int,
     duration: Int,
     questionIdStrings: String,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    viewModel: ExamViewModel? = null
 ) {
     val questionIds = remember(questionIdStrings) {
         questionIdStrings.split(",").map { it.toInt() }
     }
     val context = LocalContext.current
-    val viewModel: ExamViewModel = viewModel(
+    val viewModel: ExamViewModel = viewModel ?: viewModel(
         factory = object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 return ExamViewModel(examId, duration, questionIds) as T
             }
         }
     )
-    val toastMessage by viewModel.showToast.collectAsState()
+    val toastMessage by viewModel.errorMessage.collectAsState()
 
     LaunchedEffect(toastMessage) {
         toastMessage?.let {

@@ -33,8 +33,7 @@ class ExamViewModelTest {
         id = 101,
         difficulty = 1,
         content = "1+1=?",
-        questionType = QuestionType.SINGLE_CHOICE,
-        options = listOf("1", "2", "3"),
+        questionType = QuestionType.FILL_IN_THE_BLANK,
         correctAnswer = "2",
         explanation = "基础加法"
     )
@@ -42,8 +41,7 @@ class ExamViewModelTest {
         id = 102,
         difficulty = 1,
         content = "2+2=?",
-        questionType = QuestionType.SINGLE_CHOICE,
-        options = listOf("2", "3", "4"),
+        questionType = QuestionType.FILL_IN_THE_BLANK,
         correctAnswer = "4",
         explanation = "基础加法"
     )

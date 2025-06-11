@@ -15,7 +15,7 @@ class ExamResultScreenTest {
     val composeTestRule = createComposeRule()
 
     @Test
-    fun examResultScreen_displaysScoreAndMessage_Excellent() {
+    fun `显示成绩-优秀`() {
         val testScore = "95"
         var onBackClicked = false
 
@@ -39,7 +39,7 @@ class ExamResultScreenTest {
     }
 
     @Test
-    fun examResultScreen_displaysScoreAndMessage_Good() {
+    fun `显示成绩-良好`() {
         val testScore = "85"
         composeTestRule.setContent {
             MaterialTheme {
@@ -54,7 +54,7 @@ class ExamResultScreenTest {
     }
 
     @Test
-    fun examResultScreen_displaysScoreAndMessage_Pass() {
+    fun `显示成绩-及格`() {
         val testScore = "60"
         composeTestRule.setContent {
             MaterialTheme {
@@ -69,7 +69,7 @@ class ExamResultScreenTest {
     }
 
     @Test
-    fun examResultScreen_displaysScoreAndMessage_Fail() {
+    fun `显示成绩-挂科`() {
         val testScore = "50"
         composeTestRule.setContent {
             MaterialTheme {

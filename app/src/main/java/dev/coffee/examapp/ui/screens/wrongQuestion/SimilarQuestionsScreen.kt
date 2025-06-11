@@ -69,6 +69,7 @@ fun SimilarQuestionsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .padding(horizontal = 16.dp)
     ) {
         SimilarQuestionsHeader(
             currentIndex = currentIndex,

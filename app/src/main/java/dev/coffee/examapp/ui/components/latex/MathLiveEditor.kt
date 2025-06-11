@@ -1,10 +1,12 @@
 package dev.coffee.examapp.ui.components.latex
 
+import dev.coffee.examapp.R
 import android.annotation.SuppressLint
 import android.view.MotionEvent
 import android.view.ViewConfiguration
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -65,9 +67,16 @@ fun MathLiveEditor(
                 },
             factory = { ctx ->
                 WebView(ctx).apply {
+                    id = R.id.math_editor
+                    tag = ""
                     webViewRef = this
                     configureWebView(textColor)
                     addJavascriptInterface(WebViewBridge(), "AndroidBridge")
+                    webViewClient = object : WebViewClient() {
+                        override fun onPageFinished(view: WebView?, url: String?) {
+                            view?.tag = "math_editor"
+                        }
+                    }
                     loadMathLiveContent(currentLatex, textColor)
 
                     setOnTouchListener { v, event ->
@@ -131,15 +140,6 @@ private fun WebView.configureWebView(textColor: Color) {
         allowFileAccessFromFileURLs = true
         allowUniversalAccessFromFileURLs = true
     }
-
-    /*webViewClient = object : WebViewClient() {
-        override fun onPageFinished(view: WebView, url: String?) {
-            view.evaluateJavascript(
-                "document.body.style.backgroundColor='transparent';",
-                null
-            )
-        }
-    }*/
 }
 
 private fun WebView.loadMathLiveContent(latex: String, textColor: Color) {

@@ -3,19 +3,19 @@ package dev.coffee.examapp.ui.components.latex
 import android.annotation.SuppressLint
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import dev.coffee.examapp.R
 import java.net.URLEncoder
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -27,6 +27,7 @@ fun MathKeyboard(
     modifier: Modifier = Modifier
 ) {
     val textColor = MaterialTheme.colorScheme.onSurface
+    val isWebViewLoaded = remember { mutableStateOf(false) }
     val modalState = rememberModalBottomSheetState(
         confirmValueChange = { target ->
             if (target == SheetValue.Hidden) {
@@ -72,9 +73,11 @@ private fun KeyboardWebView(
     AndroidView(
         factory = { ctx ->
             WebView(ctx).apply {
+                id = R.id.math_keyboard
+                tag = ""
                 val textColorHex = "#${textColor.toArgb().toUInt().toString(16).substring(2)}"
                 val escapedLatex = latex.escapeJS()
-                configureKeyboardWebView(onKeyPress)
+                configureKeyboardWebView(onKeyPress) { this.post { this.tag = "math_keyboard" } }
                 loadUrl("file:///android_asset/mathlive/keyboard.html?latex=${
                     URLEncoder.encode(escapedLatex, "UTF-8")
                     }&color=${URLEncoder.encode(textColorHex, "UTF-8")}")
@@ -84,7 +87,10 @@ private fun KeyboardWebView(
 }
 
 @SuppressLint("SetJavaScriptEnabled")
-private fun WebView.configureKeyboardWebView(onKeyPress: (String) -> Unit) {
+private fun WebView.configureKeyboardWebView(
+    onKeyPress: (String) -> Unit,
+    onLoaded: () -> Unit
+) {
     setBackgroundColor(android.graphics.Color.TRANSPARENT)
     isVerticalScrollBarEnabled = false
     isHorizontalScrollBarEnabled = false
@@ -102,6 +108,10 @@ private fun WebView.configureKeyboardWebView(onKeyPress: (String) -> Unit) {
         @JavascriptInterface
         fun onKeyPressed(symbol: String) {
             onKeyPress(symbol)
+        }
+        @JavascriptInterface
+        fun onLoaded() {
+            onLoaded()
         }
     }, "KeyboardReceiver")
 }

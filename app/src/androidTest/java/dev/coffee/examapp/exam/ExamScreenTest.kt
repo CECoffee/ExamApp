@@ -1,22 +1,9 @@
 package dev.coffee.examapp.exam
 
-import android.view.KeyEvent as AndroidKeyEvent
 import androidx.compose.ui.input.key.KeyEvent
-import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertIsNotEnabled
-import androidx.compose.ui.test.junit4.ComposeContentTestRule
+import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onNodeWithContentDescription
-import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.onRoot
-import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performKeyPress
 import androidx.test.espresso.Espresso.pressBack
-import androidx.compose.ui.test.performTextInput
-import androidx.lifecycle.viewmodel.compose.viewModel
-import dev.coffee.examapp.model.Question
-import dev.coffee.examapp.model.QuestionType
 import dev.coffee.examapp.ui.screens.exam.ExamScreen
 import dev.coffee.examapp.viewmodel.ExamViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,6 +12,7 @@ import org.junit.Test
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.jvm.isAccessible
 import kotlin.reflect.jvm.javaField
+import android.view.KeyEvent as AndroidKeyEvent
 
 
 class ExamScreenTest {
@@ -62,7 +50,7 @@ class ExamScreenTest {
     }
 
     @Test
-    fun showExamHeader_correctlyDisplaysRemainingTimeAndProgress() {
+    fun `ExamHeader正确展示进度和剩余时间`() {
         setContent()
         setPrivateStateFlow("_remainingTime", 75)
         setPrivateStateFlow("_currentQuestionIndex", 0)
@@ -73,28 +61,28 @@ class ExamScreenTest {
     }
 
     @Test
-    fun showSubmitButtonOnLastQuestion() {
+    fun `显示答案提交按钮`() {
         setContent()
         setPrivateStateFlow("_currentQuestionIndex", 1)
         composeTestRule.onNodeWithText("提交").assertIsDisplayed()
     }
 
     @Test
-    fun showNextButtonBeforeLastQuestion() {
+    fun `显示下一题按钮`() {
         setContent()
         setPrivateStateFlow("_currentQuestionIndex", 0)
         composeTestRule.onNodeWithText("下一题").assertIsDisplayed()
     }
 
     @Test
-    fun showPreviousButtonWhenNotFirstQuestion() {
+    fun `不是第一题时显示上一题按钮`() {
         setContent()
         setPrivateStateFlow("_currentQuestionIndex", 1)
         composeTestRule.onNodeWithText("上一题").assertIsDisplayed()
     }
 
     @Test
-    fun examFinished_showsResultScreen() {
+    fun `考试结束后显示考试结束页面`() {
         setContent()
         setPrivateStateFlow("_examFinished", true)
         setPrivateStateFlow("_score", 88.0)
@@ -102,7 +90,7 @@ class ExamScreenTest {
     }
 
     @Test
-    fun alertDialogAppears_whenBackPressedDuringExam() {
+    fun `返回后显示Dialog提示`() {
         setContent()
         composeTestRule.runOnUiThread {
             viewModel.finishExam() // 先重置为完成

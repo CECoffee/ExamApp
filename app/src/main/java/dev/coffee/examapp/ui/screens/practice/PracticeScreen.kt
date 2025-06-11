@@ -109,8 +109,7 @@ fun PracticeScreen(
                 onClick = { viewModel.proceedToNextQuestion() },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 8.dp)
-                    .testTag("next_or_finish_btn"),
+                    .padding(vertical = 8.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary
                 )
@@ -155,7 +154,7 @@ fun PracticeHeader(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = "<", // Back arrow symbol
+                    text = "<",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     modifier = Modifier
                         .clickable(onClick = onBack)

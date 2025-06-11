@@ -37,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -112,7 +113,8 @@ fun PracticeListScreen(
                         state = pagerState,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .wrapContentHeight(),
+                            .wrapContentHeight()
+                            .testTag("practice_name"),
                         verticalAlignment = Alignment.Top
                     ) { page ->
                         val practice = practices[page]
@@ -141,6 +143,7 @@ fun PracticeListScreen(
                                     .clickable {
                                         viewModel.selectPractice(index)
                                     }
+                                    .testTag("practice_dot")
                             )
                         }
                     }
@@ -225,7 +228,8 @@ fun ChapterItem(chapter: Chapter, onClick: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
-            .clickable(onClick = onClick),
+            .clickable(onClick = onClick)
+            .testTag("chapter_item"),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {

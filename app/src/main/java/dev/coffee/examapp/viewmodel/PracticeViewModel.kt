@@ -24,7 +24,7 @@ class PracticeViewModel(
     private val _currentQuestionIndex = MutableStateFlow(0)
     val currentQuestionIndex: StateFlow<Int> = _currentQuestionIndex.asStateFlow()
 
-    private val _totalQuestions = 10 // Fixed to 10 questions per practice
+    private var _totalQuestions = 10 // Fixed to 10 questions per practice
     val totalQuestions: Int get() = _totalQuestions
 
     private val _userAnswer = MutableStateFlow("")
@@ -55,12 +55,7 @@ class PracticeViewModel(
     }
 
     fun proceedToNextQuestion() {
-        if (_nextQuestion.value?.id != 0) {
-            _currentQuestionIndex.value ++
-        } else {
-            _showToast.value = "本章节题库已空"
-            _practiceFinished.value = true
-        }
+        _currentQuestionIndex.value ++
         loadNextQuestion()
     }
 
@@ -81,14 +76,9 @@ class PracticeViewModel(
     }
 
     fun submitAnswer() {
-        if (_userAnswer.value.isBlank()) {
-            _showToast.value = "请输入答案"
-            return
-        }
-
-        _isLoading.value = true
         viewModelScope.launch {
             try {
+                _isLoading.value = true
                 _isCorrect.value = _userAnswer.value == _currentQuestion.value?.correctAnswer
 
                  val response = apiService.submitPracticeAnswer(
@@ -108,6 +98,10 @@ class PracticeViewModel(
                      _showExplanation.value = true
 
                      _nextQuestion.value = response.body()
+                     if (_nextQuestion.value?.id == 0) {
+                         _showToast.value = "本章节题库已空"
+                         _totalQuestions = _currentQuestionIndex.value + 1
+                     }
                  } else {
                      _showToast.value = "提交答案失败: ${response.code()}"
                  }

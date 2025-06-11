@@ -27,6 +27,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.sp
 
 @Composable
@@ -45,7 +46,6 @@ fun BottomNavigationBar(
 
             NavigationBarItem(
                 icon = {
-                    // 添加选中状态的背景
                     Box(
                         contentAlignment = Center,
                         modifier = Modifier
@@ -56,6 +56,7 @@ fun BottomNavigationBar(
                             )
                             .width(72.dp)
                             .height(32.dp)
+                            .semantics(mergeDescendants = true) {}
                     ) {
                         Icon(
                             imageVector = screen.icon,

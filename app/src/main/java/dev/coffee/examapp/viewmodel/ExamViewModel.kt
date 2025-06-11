@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlin.let
 
 class ExamViewModel(
     private val examId: Int,
@@ -90,21 +89,25 @@ class ExamViewModel(
     }
 
     fun navigateToNext() {
-        viewModelScope.launch {
-            _isLoading.value = true
-            try {
-                submitCurrentAnswer()
-                val nextIndex = _currentQuestionIndex.value + 1
-                if (nextIndex < questionIds.size) {
-                    _currentQuestionIndex.value = nextIndex
-                    loadQuestion(questionIds[nextIndex])
-                } else {
-                    finishExam()
+        if (_userAnswer.value.isEmpty()) {
+            _errorMessage.value = "请输入答案"
+        } else {
+            viewModelScope.launch {
+                _isLoading.value = true
+                try {
+                    submitCurrentAnswer()
+                    val nextIndex = _currentQuestionIndex.value + 1
+                    if (nextIndex < questionIds.size) {
+                        _currentQuestionIndex.value = nextIndex
+                        loadQuestion(questionIds[nextIndex])
+                    } else {
+                        finishExam()
+                    }
+                } catch (e: Exception) {
+                    _errorMessage.value = e.message
+                } finally {
+                    _isLoading.value = false
                 }
-            } catch (e: Exception) {
-                _errorMessage.value = e.message
-            } finally {
-                _isLoading.value = false
             }
         }
     }
@@ -119,6 +122,8 @@ class ExamViewModel(
                     _currentQuestionIndex.value = prevIndex
                     loadQuestion(questionIds[prevIndex])
                 }
+            } catch (e: Exception) {
+                _errorMessage.value = e.message
             } finally {
                 _isLoading.value = false
             }

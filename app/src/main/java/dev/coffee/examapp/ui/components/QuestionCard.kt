@@ -92,20 +92,13 @@ fun QuestionCard(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // 题干区：LatexWebview 外加隐藏 Text 供测试
                 Box {
                     LatexWebview(
                         latex = question.content,
                         modifier = Modifier
                             .padding(bottom = 16.dp)
                             .background(Color.Transparent)
-                    )
-                    Text(
-                        text = question.content,
-                        modifier = Modifier
                             .testTag("question_content_tag")
-                            .alpha(0f)
-                            .align(Alignment.TopStart)
                     )
                 }
 
@@ -130,12 +123,7 @@ fun QuestionCard(
                             text = "你的答案:",
                             modifier = Modifier.wrapContentWidth()
                         )
-                        // 隐藏Text，方便测试
-                        Text(
-                            text = userAnswer,
-                            modifier = Modifier.testTag("user_answer_tag").alpha(0f)
-                        )
-                        LatexWebview(userAnswer, Modifier.fillMaxWidth())
+                        LatexWebview(userAnswer, Modifier.fillMaxWidth().testTag("user_answer_tag"))
                     }
 
                     Row(
@@ -148,12 +136,11 @@ fun QuestionCard(
                             text = "正确答案:",
                             modifier = Modifier.padding(bottom = 8.dp)
                         )
-                        // 隐藏Text，方便测试
-                        Text(
-                            text = question.correctAnswer ?: "",
-                            modifier = Modifier.testTag("correct_answer_tag").alpha(0f)
+                        LatexWebview(
+                            latex = question.correctAnswer ?: "",
+                            Modifier.fillMaxWidth()
+                                .testTag("correct_answer_tag")
                         )
-                        LatexWebview(question.correctAnswer ?: "", Modifier.fillMaxWidth())
                     }
 
                     Text(
@@ -162,17 +149,12 @@ fun QuestionCard(
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Bold
                     )
-
-                    // 隐藏Text，方便测试
-                    Text(
-                        text = question.explanation,
-                        modifier = Modifier.testTag("explanation_content_tag").alpha(0f)
-                    )
                     LatexWebview(
                         latex = question.explanation,
                         modifier = Modifier
                             .padding(bottom = 16.dp)
                             .background(Color.Transparent)
+                            .testTag("explanation_content_tag")
                     )
                 } else {
                     when (question.questionType) {

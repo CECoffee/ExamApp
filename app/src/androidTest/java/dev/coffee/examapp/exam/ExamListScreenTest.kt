@@ -72,7 +72,7 @@ class ExamListScreenTest {
     }
 
     @Test
-    fun examList_showsPendingExams_whenDataIsLoaded() {
+    fun `数据加载后显示代考考试`() {
         val navController = TestNavHostController(ApplicationProvider.getApplicationContext())
         val viewModel = ExamListViewModel()
         setPrivateStateFlow(
@@ -89,7 +89,7 @@ class ExamListScreenTest {
     }
 
     @Test
-    fun examList_showsErrorToast_whenErrorMessageSet() {
+    fun `设置errorMessage-显示Toast提示`() {
         val navController = TestNavHostController(ApplicationProvider.getApplicationContext())
         val viewModel = ExamListViewModel()
         setPrivateStateFlow(viewModel, "_exams", emptyList<Exam>())
@@ -101,7 +101,7 @@ class ExamListScreenTest {
     }
 
     @Test
-    fun displaysTitleAndTabs() {
+    fun `显示标题和Tab栏`() {
         val navController = TestNavHostController(ApplicationProvider.getApplicationContext())
         val viewModel = ExamListViewModel()
         setPrivateStateFlow(viewModel, "_exams", emptyList<Exam>())
@@ -117,7 +117,7 @@ class ExamListScreenTest {
     }
 
     @Test
-    fun showsPendingExamsInDefaultTab() {
+    fun `默认Tab栏显示待考考试`() {
         val navController = TestNavHostController(ApplicationProvider.getApplicationContext())
         val viewModel = ExamListViewModel()
         setPrivateStateFlow(
@@ -139,7 +139,7 @@ class ExamListScreenTest {
 
 
     @Test
-    fun clickingStartExam_navigatesToExamScreen() {
+    fun `点击开始考试-导航至考试页面`() {
         val pendingExam = createFakeExams().first { it.status == ExamStatus.PENDING }
 
         composeTestRule.setContent {
@@ -199,7 +199,7 @@ class ExamListScreenTest {
     }
 
     @Test
-    fun clickingViewResult_navigatesToExamResultScreen() {
+    fun `点击查看成绩-导航至考试成绩页面`() {
         val completedExam = createFakeExams().first { it.status == ExamStatus.COMPLETED }
 
         composeTestRule.setContent {

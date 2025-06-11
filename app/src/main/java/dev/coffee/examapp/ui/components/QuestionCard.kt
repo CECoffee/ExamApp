@@ -162,7 +162,8 @@ fun QuestionCard(
                             MathLiveEditor(
                                 initialLatex = userAnswer,
                                 onAnswerChanged = { newLatex ->
-                                    onAnswerChanged(newLatex)
+                                    val finalLatex = newLatex.replace("""\exponentialE""", "e")
+                                    onAnswerChanged(finalLatex)
                                 },
                                 modifier = Modifier
                                     .fillMaxWidth()

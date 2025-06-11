@@ -7,6 +7,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -42,7 +43,7 @@ fun WrongQuestionCard(
                     }
                 },
                 style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(bottom = 4.dp)
+                modifier = Modifier.padding(bottom = 4.dp).testTag("question_content_tag")
             )
 
             LatexWebview(
@@ -50,6 +51,7 @@ fun WrongQuestionCard(
                 modifier = Modifier
                     .padding(bottom = 16.dp)
                     .background(Color.Transparent)
+                    .testTag("LatexWebview")
             )
 
             // 用户答案和正确答案
@@ -81,7 +83,8 @@ fun WrongQuestionCard(
             Button(
                 onClick = onViewExplanation,
                 enabled = !isLoading,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth()
+                    .testTag("ViewExplanationButton"),
                 shape = RoundedCornerShape(8.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
@@ -91,7 +94,8 @@ fun WrongQuestionCard(
                 if (isLoading) {
                     CircularProgressIndicator(
                                 color = MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier.size(24.dp),
+                                modifier = Modifier.size(24.dp)
+                                    .testTag("LoadingIndicator"),
                                 strokeWidth = 2.dp
                             )
                 } else {

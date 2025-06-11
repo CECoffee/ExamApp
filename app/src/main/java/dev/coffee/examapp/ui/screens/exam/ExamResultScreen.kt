@@ -86,4 +86,6 @@ fun ExamResultScreen(scoreString: String, onBack: () -> Unit) {
             Text("返回首页", style = TextStyle(fontSize = 18.sp))
         }
     }
+
+
 }

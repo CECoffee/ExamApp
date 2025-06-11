@@ -174,7 +174,7 @@ private fun ScoreTrendChart(
                 .fillMaxSize()
                 .padding(8.dp)
         ) {
-            Canvas(modifier = Modifier.fillMaxSize().background(surfaceColor)) {
+            Canvas(modifier = Modifier.fillMaxSize().background(surfaceColor).testTag("ScoreTrendCanvas")) {
                 val canvasWidth = size.width
                 val canvasHeight = size.height
                 val padding = 40.dp.toPx()

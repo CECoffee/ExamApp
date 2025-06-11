@@ -3,6 +3,7 @@ package dev.coffee.examapp.exam
 import android.view.KeyEvent as AndroidKeyEvent
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -11,6 +12,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyPress
+import androidx.test.espresso.Espresso.pressBack
 import androidx.compose.ui.test.performTextInput
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.coffee.examapp.model.Question
@@ -117,5 +119,40 @@ class ExamScreenTest {
     }
 
     // 可根据需要继续添加更多测试用例
+
+
+    @Test
+    fun alertDialogAppears_whenBackPressedDuringExam2() {
+        setContent()
+
+        composeTestRule.runOnUiThread {
+            setPrivateStateFlow("_examFinished", false)
+        }
+
+        // 通过 Espresso 模拟系统返回键（这能触发 Compose 的 BackHandler）
+        pressBack()
+
+        // 验证 AlertDialog 是否出现
+        composeTestRule.onNodeWithText("退出考试").assertIsDisplayed()
+        composeTestRule.onNodeWithText("中途退出将直接提交成绩，确定退出吗？").assertIsDisplayed()
+        composeTestRule.onNodeWithText("确定").assertIsDisplayed()
+        composeTestRule.onNodeWithText("取消").assertIsDisplayed()
+    }
+
+    @Test
+    fun buttonsShowLoadingStateWhenIsLoading() {
+        setContent()
+        setPrivateStateFlow("_currentQuestionIndex", 0)
+        setPrivateStateFlow("_isLoading", true)
+        composeTestRule.onNodeWithText("上一题").assertIsNotEnabled()
+        composeTestRule.onNodeWithTag("Circular Progress Indicator").assertExists()
+    }
+
+
+
+
+
+
+
 }
 

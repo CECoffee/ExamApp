@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.navigation.NavType
@@ -232,4 +233,43 @@ class ExamListScreenTest {
         assertEquals(Screen.ExamResult.route + "/{score}", backStackEntry?.destination?.route)
         assertEquals(completedExam.score.toString(), backStackEntry?.arguments?.getString("score"))
     }
+
+    @Test
+    fun showsEmptyState_whenNoExams() {
+        val navController = TestNavHostController(ApplicationProvider.getApplicationContext())
+        val viewModel = ExamListViewModel()
+        setPrivateStateFlow(viewModel, "_exams", emptyList<Exam>())
+
+        composeTestRule.setContent {
+            ExamListScreen(navController = navController, viewModel = viewModel)
+        }
+
+        composeTestRule.onNodeWithText("没有待考考试").assertIsDisplayed()
+
+        composeTestRule.onNodeWithText("已考").performClick()
+        composeTestRule.onNodeWithText("没有已完成的考试").assertIsDisplayed()
+
+        composeTestRule.onNodeWithText("已过期").performClick()
+        composeTestRule.onNodeWithText("没有已过期的考试").assertIsDisplayed()
+    }
+
+    @Test
+    fun showsExpiredExamsInTab() {
+        val expiredExam = createFakeExams().first().copy(status = ExamStatus.EXPIRED)
+
+        val navController = TestNavHostController(ApplicationProvider.getApplicationContext())
+        val viewModel = ExamListViewModel()
+        setPrivateStateFlow(viewModel, "_exams", listOf(expiredExam))
+
+        composeTestRule.setContent {
+            ExamListScreen(navController = navController, viewModel = viewModel)
+        }
+
+        composeTestRule.onNodeWithText("已过期").performClick()
+        composeTestRule.onNodeWithText("测试考试").assertExists()
+    }
+
+
+
+
 }

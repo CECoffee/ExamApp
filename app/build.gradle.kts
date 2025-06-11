@@ -88,6 +88,8 @@ dependencies {
     implementation ("androidx.paging:paging-compose:3.3.6")
     implementation("androidx.compose.foundation:foundation-android:1.7.4")
     implementation("androidx.compose.ui:ui-test-junit4-android:1.8.2")
+    implementation("androidx.room:room-external-antlr:2.7.1")
+    implementation("androidx.navigation:navigation-testing-android:2.9.0")
 
     // 测试依赖
     testImplementation ("junit:junit:4.13.2")

@@ -1,4 +1,5 @@
 package dev.coffee.examapp.ui.screens.practice
+
 import android.widget.Toast
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -25,16 +26,17 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
-import dev.coffee.examapp.viewmodel.PracticeViewModel
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import dev.coffee.examapp.ui.components.QuestionCard
+import dev.coffee.examapp.viewmodel.PracticeViewModel
 
 @Composable
 fun PracticeScreen(
@@ -107,7 +109,8 @@ fun PracticeScreen(
                 onClick = { viewModel.proceedToNextQuestion() },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 8.dp),
+                    .padding(vertical = 8.dp)
+                    .testTag("next_or_finish_btn"),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary
                 )
@@ -118,7 +121,8 @@ fun PracticeScreen(
                 enabled = userAnswer.isNotBlank() && !isLoading,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 8.dp),
+                    .padding(vertical = 8.dp)
+                    .testTag("submit_answer_btn"),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary
                 )
@@ -273,7 +277,8 @@ fun PracticeResultScreen(
             onClick = onBack,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 32.dp),
+                .padding(horizontal = 32.dp)
+                .testTag("result_back_btn"),
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primary
             )
@@ -281,4 +286,5 @@ fun PracticeResultScreen(
             Text(text = "返回", color = MaterialTheme.colorScheme.onPrimary)
         }
     }
+
 }

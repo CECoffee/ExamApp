@@ -82,4 +82,54 @@ class ExamResultScreenTest {
         composeTestRule.onNodeWithText("50分").assertIsDisplayed()
         composeTestRule.onNodeWithText("再接再厉！").assertIsDisplayed()
     }
+
+    @Test
+    fun examResultScreen_displaysMessage_BoundaryExcellent() {
+        composeTestRule.setContent {
+            MaterialTheme {
+                ExamResultScreen(scoreString = "90", onBack = {})
+            }
+        }
+        composeTestRule.onNodeWithText("90分").assertIsDisplayed()
+        composeTestRule.onNodeWithText("优秀！").assertIsDisplayed()
+    }
+
+    @Test
+    fun examResultScreen_displaysMessage_BoundaryGood() {
+        composeTestRule.setContent {
+            MaterialTheme {
+                ExamResultScreen(scoreString = "89.9", onBack = {})
+            }
+        }
+        composeTestRule.onNodeWithText("89分").assertIsDisplayed() // .toInt() 取整
+        composeTestRule.onNodeWithText("良好！").assertIsDisplayed()
+    }
+
+
+    @Test
+    fun examResultScreen_handlesExtremeScores() {
+        composeTestRule.setContent {
+            MaterialTheme {
+                ExamResultScreen(scoreString = "150", onBack = {})
+            }
+        }
+        composeTestRule.onNodeWithText("150分").assertIsDisplayed()
+        composeTestRule.onNodeWithText("优秀！").assertIsDisplayed()
+
+    }
+
+    @Test
+    fun examResultScreen_handlesExtremeScore2() {
+
+        composeTestRule.setContent {
+            MaterialTheme {
+                ExamResultScreen(scoreString = "-10", onBack = {})
+            }
+        }
+        composeTestRule.onNodeWithText("-10分").assertIsDisplayed()
+        composeTestRule.onNodeWithText("再接再厉！").assertIsDisplayed()
+    }
+
+
+
 }

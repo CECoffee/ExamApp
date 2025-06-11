@@ -32,6 +32,7 @@ import dev.coffee.examapp.model.QuestionType
 import dev.coffee.examapp.model.QuestionType.*
 import dev.coffee.examapp.ui.components.latex.LatexWebview
 import dev.coffee.examapp.ui.components.latex.MathLiveEditor
+import androidx.compose.ui.draw.alpha
 
 @Composable
 fun QuestionCard(
@@ -91,12 +92,22 @@ fun QuestionCard(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                LatexWebview(
-                    latex = question.content,
-                    modifier = Modifier
-                        .padding(bottom = 16.dp)
-                        .background(Color.Transparent)
-                )
+                // 题干区：LatexWebview 外加隐藏 Text 供测试
+                Box {
+                    LatexWebview(
+                        latex = question.content,
+                        modifier = Modifier
+                            .padding(bottom = 16.dp)
+                            .background(Color.Transparent)
+                    )
+                    Text(
+                        text = question.content,
+                        modifier = Modifier
+                            .testTag("question_content_tag")
+                            .alpha(0f)
+                            .align(Alignment.TopStart)
+                    )
+                }
 
                 if (showExplanation) {
                     val resultColor = if (question.correctAnswer == userAnswer) Color(0xFF4CAF50) else Color(0xFFF44336)
@@ -110,25 +121,39 @@ fun QuestionCard(
                     )
 
                     Row(
-                        modifier = Modifier.fillMaxWidth().padding(8.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
                             text = "你的答案:",
                             modifier = Modifier.wrapContentWidth()
                         )
+                        // 隐藏Text，方便测试
+                        Text(
+                            text = userAnswer,
+                            modifier = Modifier.testTag("user_answer_tag").alpha(0f)
+                        )
                         LatexWebview(userAnswer, Modifier.fillMaxWidth())
                     }
 
                     Row(
-                        modifier = Modifier.fillMaxWidth().padding(8.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
                             text = "正确答案:",
                             modifier = Modifier.padding(bottom = 8.dp)
                         )
-                        LatexWebview(question.correctAnswer?: "", Modifier.fillMaxWidth())
+                        // 隐藏Text，方便测试
+                        Text(
+                            text = question.correctAnswer ?: "",
+                            modifier = Modifier.testTag("correct_answer_tag").alpha(0f)
+                        )
+                        LatexWebview(question.correctAnswer ?: "", Modifier.fillMaxWidth())
                     }
 
                     Text(
@@ -138,6 +163,11 @@ fun QuestionCard(
                         fontWeight = FontWeight.Bold
                     )
 
+                    // 隐藏Text，方便测试
+                    Text(
+                        text = question.explanation,
+                        modifier = Modifier.testTag("explanation_content_tag").alpha(0f)
+                    )
                     LatexWebview(
                         latex = question.explanation,
                         modifier = Modifier

@@ -18,6 +18,7 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import kotlin.random.Random
@@ -25,7 +26,7 @@ import kotlin.random.Random
 @Composable
 fun LatexWebview(
     latex: String,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     val textColor = MaterialTheme.colorScheme.onSurface
     var webViewRef by remember { mutableStateOf<WebView?>(null) }

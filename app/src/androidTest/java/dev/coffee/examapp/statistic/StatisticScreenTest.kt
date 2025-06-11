@@ -1,5 +1,6 @@
 package dev.coffee.examapp.statistic
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -23,6 +24,7 @@ import org.junit.Rule
 import org.junit.Test
 import java.util.*
 import kotlinx.coroutines.flow.asStateFlow
+import java.text.SimpleDateFormat
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.jvm.isAccessible
 import kotlin.reflect.jvm.javaField
@@ -90,9 +92,44 @@ class StatisticScreenTest {
 
     @Test
     fun showsLoading_whenIsLoadingTrue() {
-        setContent(isLoading = true)
-        composeTestRule.onNodeWithTag("CircularProgressIndicator").assertExists()
+        val viewModel = ExamListViewModel()
+
+        // 设置非空 exams 以阻止 loadExams 覆盖 isLoading
+        setPrivateStateFlow(viewModel, "_exams", listOf( Exam(
+            id = 1,
+            name = "测试考试",
+            duration = 90,
+            questionList = listOf(1, 2, 3),
+            status = ExamStatus.PENDING,
+            score = null,
+            startTime = Date(),
+            endTime = Date()
+        ),
+            Exam(
+                id = 2,
+                name = "历史考试",
+                duration = 60,
+                questionList = listOf(4, 5),
+                status = ExamStatus.COMPLETED,
+                score = 95.0,
+                startTime = Date(),
+                endTime = Date()
+            )))
+        setPrivateStateFlow(viewModel, "_isLoading", true)
+
+        composeTestRule.setContent {
+            StatisticScreen(
+                navController = navController,
+                viewModel = viewModel
+            )
+        }
+
+        composeTestRule
+            .onNodeWithTag("CircularProgressIndicator")
+            .assertExists("Loading indicator should be visible")
     }
+
+
 
     @Test
     fun showsEmptyState_whenNoExams() {
@@ -129,4 +166,85 @@ class StatisticScreenTest {
         composeTestRule.onNodeWithText("加载更多...").assertIsDisplayed()
         composeTestRule.onNodeWithText("考试1").assertIsDisplayed()
     }
+
+
+    @Test
+    fun clickingLoadMore_revealsMoreExams() {
+        val exams = (1..10).map {
+            Exam(
+                id = it,
+                name = "考试$it",
+                endTime = Date(),
+                score = 90.0 + it,
+                status = ExamStatus.COMPLETED,
+                startTime = Date(),
+                duration = 120,
+                questionList = listOf()
+            )
+        }
+        setContent(isLoading = false, exams = exams)
+
+        // 初始只显示前5个
+        composeTestRule.onNodeWithText("考试6").assertDoesNotExist()
+
+        // 点击“加载更多”
+        composeTestRule.onNodeWithText("加载更多...").performClick()
+
+        // 再次检查后面的考试显示
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithText("考试6").assertIsDisplayed()
+    }
+
+    @Test
+    fun scoreChartDrawsDataPoints() {
+        val exams = listOf(
+            Exam(
+                id = 1,
+                name = "期中考试",
+                endTime = Date(),
+                score = 80.0,
+                status = ExamStatus.COMPLETED,
+                startTime = Date(),
+                duration = 60,
+                questionList = listOf()
+            ),
+            Exam(
+                id = 2,
+                name = "期末考试",
+                endTime = Date(),
+                score = 90.0,
+                status = ExamStatus.COMPLETED,
+                startTime = Date(),
+                duration = 60,
+                questionList = listOf()
+            )
+        )
+        setContent(isLoading = false, exams = exams)
+
+        // 检查图表区域存在（简单存在性检查）
+        composeTestRule.onNodeWithTag("ScoreTrendCanvas").assertExists()
+    }
+
+    @Test
+    fun examItem_displaysCorrectContent() {
+        val exam = Exam(
+            id = 1,
+            name = "生物考试",
+            endTime = SimpleDateFormat("yyyy-MM-dd").parse("2024-05-01")!!,
+            score = 88.0,
+            status = ExamStatus.COMPLETED,
+            startTime = Date(),
+            duration = 90,
+            questionList = listOf()
+        )
+        setContent(isLoading = false, exams = listOf(exam))
+
+        composeTestRule.onNodeWithText("生物考试").assertIsDisplayed()
+        composeTestRule.onNodeWithText("2024-05-01").assertIsDisplayed()
+        composeTestRule.onNodeWithText("88.0分").assertIsDisplayed()
+    }
+
+
+
+
 }

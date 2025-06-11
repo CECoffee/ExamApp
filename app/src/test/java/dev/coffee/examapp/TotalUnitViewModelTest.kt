@@ -14,4 +14,4 @@ import org.junit.runners.Suite
     SimilarQuestionsViewModelTest::class,
     WrongQuestionViewModelTest::class,
 )
-class TotalUnitTest
+class TotalUnitViewModelTest

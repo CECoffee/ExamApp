@@ -49,7 +49,7 @@ class SimilarQuestionsViewModelTest {
     @Before
     fun setup() = runBlocking {
         // TODO IP
-        val success = RetrofitClient.setBaseUrl("")
+        val success = RetrofitClient.setBaseUrl("http://47.123.2.211:8080")
         check(success) { "Failed to set base URL!" }
 
         // 通过反射注入 mockApiService

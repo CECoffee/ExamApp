@@ -38,14 +38,17 @@ class TotalInstrumentedTest {
     }
 
     private fun serverConfigStep() {
-        // TODO IP
-        composeTestRule.onNode(hasText("服务器地址")).performTextInput("")
+        // TODO 隐藏IP
+        composeTestRule.onNode(hasText("服务器地址")).performTextInput("http://47.123.2.211:8080")
+        composeTestRule.runOnIdle {  }
         composeTestRule.onNode(hasContentDescription("连接服务器")).performClick()
     }
 
     private fun showCompletedExams() {
-        composeTestRule.waitForIdle()
-        composeTestRule.onNodeWithText("已考").performTouchInput { swipeLeft() }
+        composeTestRule.waitUntil(15000) {
+            composeTestRule.onAllNodesWithText("开始考试").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNodeWithText("已考").performClick()
         composeTestRule.onAllNodesWithText("查看成绩")[0].performClick()
         composeTestRule.onNodeWithText("返回首页").performClick()
     }
@@ -134,7 +137,9 @@ class TotalInstrumentedTest {
     }
 
     private fun slidePractices() {
-        composeTestRule.waitForIdle()
+        composeTestRule.waitUntil(15000) {
+            composeTestRule.onAllNodesWithText("高等数学").fetchSemanticsNodes().isNotEmpty()
+        }
         composeTestRule.onAllNodesWithTag("practice_dot")[1].performClick()
         composeTestRule.waitForIdle()
         composeTestRule.onNodeWithTag("practice_name").performTouchInput { swipeRight() }

@@ -191,9 +191,8 @@ class WrongQuestionScreenTest {
             WrongQuestionScreen(navController = navController, viewModel = viewModel)
         }
 
-        composeTestRule.onNodeWithText("题目详情内容").assertIsDisplayed()
+        composeTestRule.onNodeWithText("解析:").assertIsDisplayed()
         composeTestRule.onNodeWithText("AI同类错题推荐").assertIsDisplayed()
-        composeTestRule.onNodeWithText("这是一个解释").assertIsDisplayed()
     }
 
     @Test

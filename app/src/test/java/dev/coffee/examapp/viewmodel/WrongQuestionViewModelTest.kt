@@ -58,7 +58,7 @@ class WrongQuestionViewModelTest {
     @Before
     fun setup() = runBlocking {
         // TODO IP
-        val success = RetrofitClient.setBaseUrl("")
+        val success = RetrofitClient.setBaseUrl("http://47.123.2.211:8080")
         check(success) { "Failed to set base URL!" }
 
         viewModel = WrongQuestionViewModel().apply {
@@ -69,7 +69,7 @@ class WrongQuestionViewModelTest {
     }
 
     @Test
-    fun `loadWrongQuestions - success should update wrongQuestions and hasMore`() = runTest {
+    fun `加载错题 - 成功应更新错题列表和是否有更多`() = runTest {
         whenever(mockApiService.getWrongQuestions(1, 3)).thenReturn(Response.success(mockWrongQuestions))
 
         viewModel.loadWrongQuestions(1)
@@ -83,7 +83,7 @@ class WrongQuestionViewModelTest {
     }
 
     @Test
-    fun `loadWrongQuestions - next page should append questions`() = runTest {
+    fun `加载错题 - 下一页应追加题目`() = runTest {
         val mockPage2 = listOf(
             WrongQuestion(
                 questionId = 3,
@@ -106,7 +106,7 @@ class WrongQuestionViewModelTest {
     }
 
     @Test
-    fun `loadWrongQuestions - empty next page should set hasMore false`() = runTest {
+    fun `加载错题 - 下一页为空时应设置无更多数据`() = runTest {
         whenever(mockApiService.getWrongQuestions(1, 3)).thenReturn(Response.success(mockWrongQuestions))
         whenever(mockApiService.getWrongQuestions(2, 3)).thenReturn(Response.success(emptyList()))
 
@@ -121,7 +121,7 @@ class WrongQuestionViewModelTest {
     }
 
     @Test
-    fun `loadWrongQuestions - error response should update errorMessage`() = runTest {
+    fun `加载错题 - 接口错误响应应更新错误信息`() = runTest {
         whenever(mockApiService.getWrongQuestions(1, 3)).thenReturn(Response.error(500, "error".toResponseBody()))
 
         viewModel.loadWrongQuestions(1)
@@ -133,7 +133,7 @@ class WrongQuestionViewModelTest {
     }
 
     @Test
-    fun `loadWrongQuestions - exception should update errorMessage`() = runTest {
+    fun `加载错题 - 异常应更新错误信息`() = runTest {
         whenever(mockApiService.getWrongQuestions(1, 3)).thenThrow(RuntimeException("Test Exception"))
 
         viewModel.loadWrongQuestions(1)
@@ -145,7 +145,7 @@ class WrongQuestionViewModelTest {
     }
 
     @Test
-    fun `refresh should reload questions from page 1`() = runTest {
+    fun `刷新应从第一页重新加载题目`() = runTest {
         whenever(mockApiService.getWrongQuestions(1, 3)).thenReturn(Response.success(mockWrongQuestions))
 
         viewModel.refresh()
@@ -156,14 +156,14 @@ class WrongQuestionViewModelTest {
     }
 
     @Test
-    fun `clearCache should clear wrongQuestions`() {
+    fun `清除缓存应清空错题列表`() {
         viewModel.wrongQuestions.value = mockWrongQuestions
         viewModel.clearCache()
         assertEquals(emptyList<WrongQuestion>(), viewModel.wrongQuestions.value)
     }
 
     @Test
-    fun `loadNextPage should call loadWrongQuestions with next page when hasMore`() = runTest {
+    fun ` 加载下一页应在有更多数据时调用加载错题`() = runTest {
         whenever(mockApiService.getWrongQuestions(1, 3)).thenReturn(Response.success(mockWrongQuestions))
         whenever(mockApiService.getWrongQuestions(2, 3)).thenReturn(
             Response.success(listOf(WrongQuestion(3, "题目内容3", "B", "C")))
@@ -178,7 +178,7 @@ class WrongQuestionViewModelTest {
     }
 
     @Test
-    fun `deleteWrongQuestion - success should update deleteState and refresh`() = runTest {
+    fun `删除错题 - 成功应更新删除状态并刷新`() = runTest {
         whenever(mockApiService.deleteWrongQuestion(1)).thenReturn(Response.success(Unit))
         whenever(mockApiService.getWrongQuestions(1, 3)).thenReturn(Response.success(mockWrongQuestions))
 
@@ -190,7 +190,7 @@ class WrongQuestionViewModelTest {
     }
 
     @Test
-    fun `deleteWrongQuestion - error should update deleteState Error`() = runTest {
+    fun `删除错题 - 错误应更新为错误状态`() = runTest {
         whenever(mockApiService.deleteWrongQuestion(1)).thenThrow(RuntimeException("删除失败"))
 
         viewModel.deleteWrongQuestion(1)
@@ -202,7 +202,7 @@ class WrongQuestionViewModelTest {
     }
 
     @Test
-    fun `getQuestionDetail - success should update questionDetail and show dialog`() = runTest {
+    fun `获取题目详情 - 成功应更新题目详情并显示对话框`() = runTest {
         whenever(mockApiService.getQuestion(1)).thenReturn(Response.success(mockQuestion))
 
         viewModel.getQuestionDetail(1)
@@ -214,7 +214,7 @@ class WrongQuestionViewModelTest {
     }
 
     @Test
-    fun `getQuestionDetail - error response should update errorMessage and show dialog`() = runTest {
+    fun `获取题目详情 - 错误响应应更新错误信息并显示对话框`() = runTest {
         whenever(mockApiService.getQuestion(1)).thenReturn(Response.error(404, "not found".toResponseBody()))
 
         viewModel.getQuestionDetail(1)
@@ -226,7 +226,7 @@ class WrongQuestionViewModelTest {
     }
 
     @Test
-    fun `getQuestionDetail - exception should update errorMessage and show dialog`() = runTest {
+    fun `获取题目详情 - 异常应更新错误信息并显示对话框`() = runTest {
         whenever(mockApiService.getQuestion(1)).thenThrow(RuntimeException("Test Exception"))
 
         viewModel.getQuestionDetail(1)
@@ -238,18 +238,15 @@ class WrongQuestionViewModelTest {
     }
 
     @Test
-    fun `viewDetail should update currentQuestionId and call getQuestionDetail`() = runTest {
+    fun `查看详情应更新当前题目 ID 并调用获取题目详情`() = runTest {
         whenever(mockApiService.getQuestion(2)).thenReturn(Response.success(mockQuestion))
 
         viewModel.viewDetail(2)
         advanceUntilIdle()
-
-        // 由于 viewDetail 只设置 _currentQuestionId，getQuestionDetail 的测试已覆盖
     }
 
     @Test
-    fun `closeQuestionDialog should reset dialog and states`() {
-        // 先人为设置
+    fun `关闭题目对话框应重置对话框和相关状态`() {
         val showDialogField = WrongQuestionViewModel::class.java.getDeclaredField("_showQuestionDialog")
         showDialogField.isAccessible = true
         (showDialogField.get(viewModel) as MutableStateFlow<Boolean>).value = true
@@ -268,7 +265,7 @@ class WrongQuestionViewModelTest {
     }
 
     @Test
-    fun `getSimilarQuestionIds - success should update similarQuestionIds and startPractice`() = runTest {
+    fun `获取相似题目 ID - 成功应更新 ID 并开始练习`() = runTest {
         whenever(mockApiService.getSimilarQuestionIds(1)).thenReturn(Response.success(listOf(2, 3, 4)))
 
         viewModel.getSimilarQuestionIds(1)
@@ -280,7 +277,7 @@ class WrongQuestionViewModelTest {
     }
 
     @Test
-    fun `getSimilarQuestionIds - error response should update errorMessage`() = runTest {
+    fun `获取相似题目 ID - 错误响应应更新错误信息`() = runTest {
         whenever(mockApiService.getSimilarQuestionIds(1)).thenReturn(Response.error(500, "error".toResponseBody()))
 
         viewModel.getSimilarQuestionIds(1)
@@ -291,7 +288,7 @@ class WrongQuestionViewModelTest {
     }
 
     @Test
-    fun `getSimilarQuestionIds - exception should update errorMessage`() = runTest {
+    fun `获取相似题目 ID - 异常应更新错误信息`() = runTest {
         whenever(mockApiService.getSimilarQuestionIds(1)).thenThrow(RuntimeException("Test Exception"))
 
         viewModel.getSimilarQuestionIds(1)
@@ -302,8 +299,7 @@ class WrongQuestionViewModelTest {
     }
 
     @Test
-    fun `clearToast should set errorMessage to null`() = runTest {
-        // 先人为设置错误信息
+    fun `清除提示应将错误信息设为空`() = runTest {
         val errorField = WrongQuestionViewModel::class.java.getDeclaredField("_errorMessage")
         errorField.isAccessible = true
         (errorField.get(viewModel) as MutableStateFlow<String?>).value = "错误: 测试"

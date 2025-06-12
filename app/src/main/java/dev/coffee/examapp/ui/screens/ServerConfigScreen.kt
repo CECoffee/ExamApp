@@ -34,8 +34,19 @@ import kotlinx.coroutines.launch
 fun ServerConfigScreen(navController: NavController) {
     var serverAddress by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
+    var navigate by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
+
+    if (navigate) {
+        navController.graph.setStartDestination(Screen.ExamList.route)
+        navController.navigate(Screen.ExamList.route) {
+            popUpTo(Screen.ServerConfig.route) {
+                inclusive = true
+            }
+            launchSingleTop = true
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -103,13 +114,7 @@ fun ServerConfigScreen(navController: NavController) {
                                 val result = setBaseUrl(serverAddress)
                                 isLoading = false
                                 if (result) {
-                                    navController.graph.setStartDestination(Screen.ExamList.route)
-                                    navController.navigate(Screen.ExamList.route) {
-                                        popUpTo(Screen.ServerConfig.route) {
-                                            inclusive = true
-                                        }
-                                        launchSingleTop = true
-                                    }
+                                    navigate = true
                                 } else { showToast(context, "连接失败") }
                             }
                         }

@@ -64,8 +64,8 @@ class ExamListViewModelTest {
 
     @Before
     fun setup() =runBlocking {
-        // TODO IP
-        val success = RetrofitClient.setBaseUrl("")
+        // TODO 隐藏真实IP
+        val success = RetrofitClient.setBaseUrl("http://47.123.2.211:8080/")
         check(success) { "Failed to set base URL!" }
 
         // 初始化 ViewModel

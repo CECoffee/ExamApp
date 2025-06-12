@@ -179,11 +179,11 @@ class ExamViewModelTest {
 
     @Test
     fun `clearToast 能清除toast信息`() {
-        val field = ExamViewModel::class.java.getDeclaredField("_showToast")
+        val field = ExamViewModel::class.java.getDeclaredField("_errorMessage")
         field.isAccessible = true
         (field.get(viewModel) as MutableStateFlow<String?>).value = "错误"
         viewModel.clearToast()
-        assertNull(viewModel.showToast.value)
+        assertNull(viewModel.errorMessage.value)
     }
 
     @Test
@@ -214,6 +214,6 @@ class ExamViewModelTest {
         advanceUntilIdle()
         viewModel.finishExam()
         advanceUntilIdle()
-        assertEquals("考试提交失败: 网络中断", viewModel.showToast.value)
+        assertEquals("考试提交失败: 网络中断", viewModel.errorMessage.value)
     }
 }

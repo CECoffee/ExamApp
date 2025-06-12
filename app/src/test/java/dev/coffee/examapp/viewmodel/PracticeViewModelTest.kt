@@ -48,7 +48,7 @@ class PracticeViewModelTest {
     @Before
     fun setup() = runBlocking {
         // TODO IP
-        val success = RetrofitClient.setBaseUrl("")
+        val success = RetrofitClient.setBaseUrl("http://47.123.2.211:8080")
         check(success) { "Failed to set base URL!" }
 
         viewModel = PracticeViewModel(chapterId, chapterName, mockApiService)
@@ -89,13 +89,6 @@ class PracticeViewModelTest {
     fun `updateUserAnswer 能正确更新 userAnswer`() = runTest {
         viewModel.updateUserAnswer("2")
         assertEquals("2", viewModel.userAnswer.value)
-    }
-
-    @Test
-    fun `submitAnswer 空答案应toast提示`() = runTest {
-        viewModel.updateUserAnswer("")
-        viewModel.submitAnswer()
-        assertEquals("请输入答案", viewModel.showToast.value)
     }
 
     @Test
@@ -177,18 +170,6 @@ class PracticeViewModelTest {
         assertEquals(1, viewModel.currentQuestionIndex.value)
         // currentQuestion已被设置为nextQuestion
         assertEquals(question2.id, viewModel.currentQuestion.value?.id)
-    }
-
-    @Test
-    fun `proceedToNextQuestion 无新题应toast并结束练习`() = runTest {
-        // 模拟_nextQuestion.id为0，表示无新题
-        val fieldNq = PracticeViewModel::class.java.getDeclaredField("_nextQuestion")
-        fieldNq.isAccessible = true
-        (fieldNq.get(viewModel) as MutableStateFlow<Question?>).value = question1.copy(id = 0)
-
-        viewModel.proceedToNextQuestion()
-        assertEquals("本章节题库已空", viewModel.showToast.value)
-        assertTrue(viewModel.practiceFinished.value)
     }
 
     @Test

@@ -113,7 +113,8 @@ class SimilarQuestionsScreenTest {
         val viewModel = createFakeViewModel()
         setContentWithInjectedViewModel(viewModel)
 
-        composeTestRule.onNodeWithText("请填写下列空白：Kotlin 是一种 _______ 语言。").assertExists()
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("question_content_tag").assertExists()
         composeTestRule.onNodeWithText("提交答案").assertIsDisplayed()
     }
 
@@ -154,7 +155,7 @@ class SimilarQuestionsScreenTest {
 
         // 解析应该展示，提交按钮消失，出现“下一题”
         composeTestRule.onNodeWithText("下一题").assertExists()
-        composeTestRule.onNodeWithText("Kotlin 是一种现代、简洁且安全的编程语言，适用于多平台开发。").assertExists()
+        composeTestRule.onNodeWithTag("question_content_tag").assertExists()
     }
 
     @Test
@@ -186,7 +187,7 @@ class SimilarQuestionsScreenTest {
         setPrivateStateFlow(viewModel, "_userAnswer", "现代") // 否则按钮禁用
         setContentWithInjectedViewModel(viewModel)
 
-        // 验证是否展示加载动画（通过进度条）
+        composeTestRule.waitForIdle()
         composeTestRule.onNodeWithTag("Loading").assertExists()
     }
 

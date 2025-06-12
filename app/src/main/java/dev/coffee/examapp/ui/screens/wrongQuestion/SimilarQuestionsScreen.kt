@@ -112,7 +112,7 @@ fun SimilarQuestionsScreen(
                 )
             ) {
                 if (isLoading) {
-                    CircularProgressIndicator(modifier = Modifier.size(20.dp) .testTag("Loading"))
+                    CircularProgressIndicator(modifier = Modifier.size(20.dp).testTag("Loading"))
                 } else { Text(text = "提交答案") }
             }
         }

@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material3.*
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,7 +35,7 @@ import dev.coffee.examapp.viewmodel.ExamListViewModel
 import kotlinx.coroutines.launch
 import java.util.Calendar
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ExamListScreen(
     navController: NavController,
@@ -44,6 +45,8 @@ fun ExamListScreen(
     val scope = rememberCoroutineScope()
     val isLoading by viewModel.isLoading.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
+    val isRefreshing by viewModel.isRefreshing.collectAsState()
+
     val tabs = listOf(
         TabItem(
             title = stringResource(R.string.tab_pending),
@@ -74,67 +77,81 @@ fun ExamListScreen(
             viewModel.clearToast()
         }
     }
-
-    Column(modifier = Modifier.fillMaxSize()) {
-        Surface(
-            color = MaterialTheme.colorScheme.surfaceVariant,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp)
+    PullToRefreshBox(
+        isRefreshing = isRefreshing,
+        onRefresh = { viewModel.refreshExams() },
+        modifier = Modifier.fillMaxSize()
+    ) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            Surface(
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                modifier = Modifier.fillMaxWidth()
             ) {
-                // 标题
-                Text(
-                    text = stringResource(R.string.exam_title),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary,
+                Column(
                     modifier = Modifier
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                        .align(Alignment.CenterHorizontally)
-                )
-
-                // Tab栏
-                TabRow(
-                    selectedTabIndex = pagerState.currentPage,
-                    modifier = Modifier.fillMaxWidth(),
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    indicator = { tabPositions ->
-                        TabRowDefaults.SecondaryIndicator(
-                            modifier = Modifier.tabIndicatorOffset(tabPositions[pagerState.currentPage]),
-                            height = 3.dp,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    },
-                    divider = {}
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp)
                 ) {
-                    tabs.forEachIndexed { index, tab ->
-                        Tab(
-                            selected = pagerState.currentPage == index,
-                            onClick = {
-                                scope.launch {
-                                    pagerState.animateScrollToPage(index)
-                                }
-                            },
-                            text = { Text(text = tab.title, color = MaterialTheme.colorScheme.onSurface) },
-                            icon = { Icon(tab.icon, contentDescription = tab.title) },
-                            selectedContentColor = MaterialTheme.colorScheme.primary,
-                            unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                    // 标题
+                    Text(
+                        text = stringResource(R.string.exam_title),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                            .align(Alignment.CenterHorizontally)
+                    )
+
+                    // Tab栏
+                    TabRow(
+                        selectedTabIndex = pagerState.currentPage,
+                        modifier = Modifier.fillMaxWidth(),
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        indicator = { tabPositions ->
+                            TabRowDefaults.SecondaryIndicator(
+                                modifier = Modifier.tabIndicatorOffset(tabPositions[pagerState.currentPage]),
+                                height = 3.dp,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        },
+                        divider = {}
+                    ) {
+                        tabs.forEachIndexed { index, tab ->
+                            Tab(
+                                selected = pagerState.currentPage == index,
+                                onClick = {
+                                    scope.launch {
+                                        pagerState.animateScrollToPage(index)
+                                    }
+                                },
+                                text = {
+                                    Text(
+                                        text = tab.title,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                },
+                                icon = { Icon(tab.icon, contentDescription = tab.title) },
+                                selectedContentColor = MaterialTheme.colorScheme.primary,
+                                unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
             }
-        }
-        // 加载状态
-        if (isLoading) {
-            LoadingIndicator()
-        } else {
-            // Tab内容
-            HorizontalPager(state = pagerState) { page ->
-                val filteredExams = viewModel.filterExamsByStatus(tabs[page].status)
-                ExamList(exams = filteredExams, status = tabs[page].status, navController = navController)
+            // 加载状态
+            if (isLoading) {
+                LoadingIndicator()
+            } else {
+                // Tab内容
+                HorizontalPager(state = pagerState) { page ->
+                    val filteredExams = viewModel.filterExamsByStatus(tabs[page].status)
+                    ExamList(
+                        exams = filteredExams,
+                        status = tabs[page].status,
+                        navController = navController
+                    )
+                }
             }
         }
     }

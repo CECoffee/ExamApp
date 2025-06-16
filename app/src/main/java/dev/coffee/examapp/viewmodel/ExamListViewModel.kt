@@ -21,12 +21,20 @@ class ExamListViewModel (): ViewModel() {
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
+
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
 
     fun loadExams(status: ExamStatus? = null) {
         viewModelScope.launch {
-            _isLoading.value = true
+//            _isLoading.value = true
+//            _errorMessage.value = null
+
+            if (!_isRefreshing.value) {
+                _isLoading.value = true
+            }
             _errorMessage.value = null
 
             try {
@@ -35,13 +43,20 @@ class ExamListViewModel (): ViewModel() {
                     _exams.value = response.body() ?: emptyList()
                 } else {
                     _errorMessage.value = "加载考试列表失败: ${response.code()}"
+                    _isRefreshing.value = false
                 }
             } catch (e: Exception) {
                 _errorMessage.value = "错误: ${e.message}"
             } finally {
                 _isLoading.value = false
+                _isRefreshing.value = false
             }
         }
+    }
+
+    fun refreshExams(status: ExamStatus? = null) {
+        _isRefreshing.value = true
+        loadExams(status)
     }
 
     fun filterExamsByStatus(status: ExamStatus): List<Exam> {

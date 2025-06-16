@@ -45,6 +45,10 @@ class ExamViewModel(
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
 
+    private val _answeredQuestions = MutableStateFlow<Set<Int>>(emptySet())
+    val answeredQuestions: StateFlow<Set<Int>> = _answeredQuestions.asStateFlow()
+
+
     init {
         startTimer()
         loadQuestion(questionIds.first())
@@ -69,7 +73,11 @@ class ExamViewModel(
             try {
                 val response = apiService.getQuestion(questionId)
                 if (response.isSuccessful) {
-                    _currentQuestion.value = response.body()
+                    val question = response.body()
+                    // 保留用户答案（如果有）
+                    question?.let { q ->
+                        _currentQuestion.value = q.copy(myAnswer = _userAnswer.value)
+                    }
                 } else {
                     _errorMessage.value = "加载题目失败: ${response.code()}"
                 }
@@ -137,6 +145,8 @@ class ExamViewModel(
                     _isCorrect.value = (answer == _currentQuestion.value?.correctAnswer)
                     calculateScore()
                     apiService.submitExamAnswer(question.id, SubmitAnswerRequest(answer, _isCorrect.value))
+                    // 新增：记录已答题号
+                    _answeredQuestions.value = _answeredQuestions.value + _currentQuestionIndex.value
                     _userAnswer.value = ""
                 } catch (e: Exception) {
                     _errorMessage.value = "答案提交失败: ${e.message}"
@@ -165,6 +175,36 @@ class ExamViewModel(
                 _errorMessage.value = "考试提交失败: ${e.message}"
             } finally {
                 _isLoading.value = false
+            }
+        }
+    }
+
+
+    // 在 navigateToQuestion 方法中，也要处理：如果当前题有答案，记录当前 index
+    fun navigateToQuestion(index: Int) {
+        if (index in questionIds.indices) {
+            viewModelScope.launch {
+                _isLoading.value = true
+                try {
+                    // 提交当前答案（如果有）
+                    if (_userAnswer.value.isNotEmpty()) {
+                        submitCurrentAnswer()
+                    }
+                    // 新增：如果当前有答案，记录当前 index
+                    if (_userAnswer.value.isNotEmpty()) {
+                        _answeredQuestions.value = _answeredQuestions.value + _currentQuestionIndex.value
+                    }
+                    // 更新当前题目索引
+                    _currentQuestionIndex.value = index
+                    // 加载新题目
+                    loadQuestion(questionIds[index])
+                    // 重置当前答案
+                    _userAnswer.value = ""
+                } catch (e: Exception) {
+                    _errorMessage.value = "跳转题目失败: ${e.message}"
+                } finally {
+                    _isLoading.value = false
+                }
             }
         }
     }

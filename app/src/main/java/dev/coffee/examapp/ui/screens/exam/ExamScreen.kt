@@ -3,7 +3,13 @@ package dev.coffee.examapp.ui.screens.exam
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -63,6 +69,8 @@ fun ExamScreen(
     val userAnswer by viewModel.userAnswer.collectAsState()
     val examFinished by viewModel.examFinished.collectAsState()
     var showExitConfirmation by remember { mutableStateOf(false) }
+    var showQuestionDialog by remember { mutableStateOf(false) }
+    val answeredQuestions by viewModel.answeredQuestions.collectAsState()
 
     BackHandler(enabled = true) {
         if (examFinished) {
@@ -109,6 +117,21 @@ fun ExamScreen(
         return
     }
 
+    // [新增] 题目导航对话框
+    if (showQuestionDialog) {
+        QuestionNavigationDialog(
+            totalQuestions = questionIds.size,
+            currentIndex = currentIndex,
+            answeredQuestions = answeredQuestions, // 新增参数
+            onDismiss = { showQuestionDialog = false },
+            onQuestionSelected = { index ->
+                viewModel.navigateToQuestion(index)
+                showQuestionDialog = false
+            }
+        )
+    }
+
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -117,6 +140,7 @@ fun ExamScreen(
         ExamHeader(
             remainingTime = remainingTime,
             currentIndex = currentIndex,
+            onShowQuestionDialog = { showQuestionDialog = true },
             totalQuestions = questionIds.size
         )
 
@@ -149,7 +173,9 @@ fun ExamScreen(
 fun ExamHeader(
     remainingTime: Int,
     currentIndex: Int,
-    totalQuestions: Int
+    totalQuestions: Int,
+    onShowQuestionDialog: () -> Unit
+
 ) {
     val minutes = remainingTime / 60
     val seconds = remainingTime % 60
@@ -176,6 +202,24 @@ fun ExamHeader(
                 fontWeight = FontWeight.Bold
             )
         }
+
+        Button(
+            onClick = onShowQuestionDialog,
+            shape = CircleShape,
+            contentPadding = PaddingValues(0.dp),
+            modifier = Modifier.size(40.dp), // 控制按钮大小
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                contentColor = MaterialTheme.colorScheme.primary
+            )
+        ) {
+            Text(
+                text = "题目",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+
 
         // 进度
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -274,4 +318,80 @@ fun NavigationButtons(
             }
         }
     }
+}
+
+@Composable
+fun QuestionNavigationDialog(
+    totalQuestions: Int,
+    currentIndex: Int,
+    answeredQuestions: Set<Int>,
+    onDismiss: () -> Unit,
+    onQuestionSelected: (Int) -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "题目导航",
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.padding(start = 8.dp)
+                )
+                IconButton(onClick = onDismiss) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "关闭",
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
+        },
+        text = {
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(5),
+                modifier = Modifier
+                    .heightIn(max = 400.dp)
+                    .fillMaxWidth(),
+                contentPadding = PaddingValues(12.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(totalQuestions) { index ->
+                    val isCurrent = index == currentIndex
+                    val isAnswered = answeredQuestions.contains(index)
+
+                    Box(
+                        modifier = Modifier
+                            .size(50.dp)
+                            .background(
+                                color = when {
+                                    isCurrent -> MaterialTheme.colorScheme.primary
+                                    isAnswered -> MaterialTheme.colorScheme.primary.copy(0.3f)
+                                    else -> MaterialTheme.colorScheme.surfaceVariant
+                                },
+                                shape = CircleShape
+                            )
+                            .clickable { onQuestionSelected(index) },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "${index + 1}",
+                            color = when {
+                                isCurrent -> MaterialTheme.colorScheme.onPrimary
+                                isAnswered -> Color.Black
+                                else -> MaterialTheme.colorScheme.onSurface
+                            },
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = {}
+    )
 }

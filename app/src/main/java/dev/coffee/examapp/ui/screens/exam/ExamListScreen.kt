@@ -163,6 +163,7 @@ fun ExamList(exams: List<Exam>, status: ExamStatus, navController: NavController
         Box(
             modifier = Modifier
                 .fillMaxSize()
+                .verticalScroll(rememberScrollState())
                 .padding(16.dp),
             contentAlignment = Alignment.Center
         ) {
@@ -175,6 +176,7 @@ fun ExamList(exams: List<Exam>, status: ExamStatus, navController: NavController
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
             )
+            Spacer(modifier = Modifier.height(500.dp))
         }
     } else {
         Column(

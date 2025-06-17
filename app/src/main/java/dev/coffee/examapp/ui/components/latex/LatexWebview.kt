@@ -26,7 +26,8 @@ import kotlin.random.Random
 @Composable
 fun LatexWebview(
     latex: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
 ) {
     val textColor = MaterialTheme.colorScheme.onSurface
     var webViewRef by remember { mutableStateOf<WebView?>(null) }
@@ -82,6 +83,7 @@ fun LatexWebview(
                             val startTime = v.getTag(touchStartTimeTagKey) as? Long ?: 0
                             if (System.currentTimeMillis() - startTime < ViewConfiguration.getTapTimeout()) {
                                 v.performClick()
+                                onClick()
                             }
                         }
                     }

@@ -40,6 +40,7 @@ import dev.coffee.examapp.ui.components.latex.LatexWebview
 import dev.coffee.examapp.ui.components.latex.MathLiveEditor
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.RectangleShape
 
 @Composable
 fun QuestionCard(
@@ -105,7 +106,8 @@ fun QuestionCard(
                         modifier = Modifier
                             .padding(bottom = 16.dp)
                             .background(Color.Transparent)
-                            .testTag("question_content_tag")
+                            .testTag("question_content_tag"),
+                        onClick = {}
                     )
                 }
 
@@ -129,7 +131,11 @@ fun QuestionCard(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(text = "你的答案:", modifier = Modifier.wrapContentWidth())
-                            LatexWebview(userAnswer, Modifier.fillMaxWidth().testTag("user_answer_tag"))
+                            LatexWebview(
+                                latex = userAnswer,
+                                Modifier.fillMaxWidth().testTag("user_answer_tag"),
+                                onClick = {}
+                            )
                         }
 
                         Row(
@@ -141,7 +147,8 @@ fun QuestionCard(
                             Text(text = "正确答案:", modifier = Modifier.padding(bottom = 8.dp))
                             LatexWebview(
                                 latex = question.correctAnswer ?: "",
-                                Modifier.fillMaxWidth().testTag("correct_answer_tag")
+                                modifier = Modifier.fillMaxWidth().testTag("correct_answer_tag"),
+                                onClick = {}
                             )
                         }
                     } else {
@@ -190,7 +197,8 @@ fun QuestionCard(
                                     latex = option,
                                     modifier = Modifier
                                         .padding(start = 8.dp)
-                                        .weight(1f)
+                                        .weight(1f),
+                                    onClick = {}
                                 )
                             }
                         }
@@ -207,7 +215,8 @@ fun QuestionCard(
                         modifier = Modifier
                             .padding(bottom = 16.dp)
                             .background(Color.Transparent)
-                            .testTag("explanation_content_tag")
+                            .testTag("explanation_content_tag"),
+                        onClick = {}
                     )
                 } else {
                     when (question.questionType) {
@@ -236,22 +245,23 @@ fun QuestionCard(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .clickable { onAnswerChanged("[$index]") }
-                                            .padding(vertical = 4.dp)
+                                            .padding(vertical = 8.dp)
                                     ) {
                                         Box(
                                             modifier = Modifier
-                                                .size(24.dp)
+                                                .size(32.dp)
                                                 .clip(CircleShape)
                                                 .background(if (selectedIndex == index) MaterialTheme.colorScheme.primary else Color.LightGray),
                                             contentAlignment = Alignment.Center
                                         ) {
-                                            Text(label, color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                            Text(label, color = MaterialTheme.colorScheme.onPrimary, fontSize = 18.sp, fontWeight = FontWeight.Bold)
                                         }
                                         LatexWebview(
                                             latex = option,
                                             modifier = Modifier
-                                                .padding(start = 8.dp)
-                                                .weight(1f)
+                                                .padding(start = 4.dp)
+                                                .weight(1f),
+                                            onClick = { onAnswerChanged("[$index]") }
                                         )
                                     }
                                 }
@@ -278,22 +288,26 @@ fun QuestionCard(
                                                 if (isSelected) selectedIndices.remove(index) else selectedIndices.add(index)
                                                 onAnswerChanged("[" + selectedIndices.sorted().joinToString(",") + "]")
                                             }
-                                            .padding(vertical = 4.dp)
+                                            .padding(vertical = 8.dp)
                                     ) {
                                         Box(
                                             modifier = Modifier
-                                                .size(24.dp)
-                                                .clip(CircleShape)
+                                                .size(32.dp)
+                                                .clip(RectangleShape)
                                                 .background(if (isSelected) MaterialTheme.colorScheme.primary else Color.LightGray),
                                             contentAlignment = Alignment.Center
                                         ) {
-                                            Text(label, color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                            Text(label, color = MaterialTheme.colorScheme.onPrimary, fontSize = 18.sp, fontWeight = FontWeight.Bold)
                                         }
                                         LatexWebview(
                                             latex = option,
                                             modifier = Modifier
-                                                .padding(start = 8.dp)
-                                                .weight(1f)
+                                                .padding(start = 4.dp)
+                                                .weight(1f),
+                                            onClick = {
+                                                if (isSelected) selectedIndices.remove(index) else selectedIndices.add(index)
+                                                onAnswerChanged("[" + selectedIndices.sorted().joinToString(",") + "]")
+                                            }
                                         )
                                     }
                                 }
@@ -302,23 +316,26 @@ fun QuestionCard(
 
                         TRUE_FALSE -> {
                             val options = listOf("对", "错")
-                            Column {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceEvenly,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
                                 options.forEach { text ->
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
+                                    Column(
+                                        horizontalAlignment = Alignment.CenterHorizontally,
                                         modifier = Modifier
-                                            .fillMaxWidth()
                                             .clickable { onAnswerChanged(text) }
-                                            .padding(vertical = 4.dp)
+                                            .padding(vertical = 8.dp)
                                     ) {
                                         Box(
                                             modifier = Modifier
-                                                .size(24.dp)
+                                                .size(32.dp)
                                                 .clip(CircleShape)
                                                 .background(if (userAnswer == text) MaterialTheme.colorScheme.primary else Color.LightGray),
                                             contentAlignment = Alignment.Center
                                         ) {
-                                            Text(text, color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                            Text(text, color = MaterialTheme.colorScheme.onPrimary, fontSize = 18.sp, fontWeight = FontWeight.Bold)
                                         }
                                     }
                                 }

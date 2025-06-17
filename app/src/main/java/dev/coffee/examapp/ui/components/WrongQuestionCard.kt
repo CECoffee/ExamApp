@@ -51,7 +51,8 @@ fun WrongQuestionCard(
                 modifier = Modifier
                     .padding(bottom = 16.dp)
                     .background(Color.Transparent)
-                    .testTag("LatexWebview")
+                    .testTag("LatexWebview"),
+                onClick = {}
             )
 
             // 用户答案和正确答案

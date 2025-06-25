@@ -117,12 +117,11 @@ fun ExamScreen(
         return
     }
 
-    // [新增] 题目导航对话框
     if (showQuestionDialog) {
         QuestionNavigationDialog(
             totalQuestions = questionIds.size,
             currentIndex = currentIndex,
-            answeredQuestions = answeredQuestions, // 新增参数
+            answeredQuestions = answeredQuestions,
             onDismiss = { showQuestionDialog = false },
             onQuestionSelected = { index ->
                 viewModel.navigateToQuestion(index)
@@ -147,13 +146,15 @@ fun ExamScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         // 题目内容区域
-        QuestionCard(
-            question = currentQuestion,
-            isLoading = isLoading,
-            onAnswerChanged = { viewModel.updateAnswer(it) },
-            userAnswer = userAnswer,
-            showExplanation = false
-        )
+        if (!isLoading) {
+            QuestionCard(
+                question = currentQuestion,
+                isLoading = false,
+                onAnswerChanged = { viewModel.updateAnswer(it) },
+                userAnswer = userAnswer,
+                showExplanation = false
+            )
+        }
 
         Spacer(modifier = Modifier.weight(1f))
 
@@ -203,26 +204,11 @@ fun ExamHeader(
             )
         }
 
-        Button(
-            onClick = onShowQuestionDialog,
-            shape = CircleShape,
-            contentPadding = PaddingValues(0.dp),
-            modifier = Modifier.size(40.dp), // 控制按钮大小
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
-                contentColor = MaterialTheme.colorScheme.primary
-            )
-        ) {
-            Text(
-                text = "题目",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
-
-
         // 进度
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.clickable(onClick = onShowQuestionDialog)
+        ) {
             Text(
                 text = "题目进度",
                 color = MaterialTheme.colorScheme.onSurface,
@@ -258,7 +244,7 @@ fun NavigationButtons(
             enabled = currentIndex > 0 && !isLoading,
             modifier = Modifier.width(120.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant
+                containerColor = MaterialTheme.colorScheme.primary
             )
         ) {
             if (isLoading && currentIndex > 0) {
@@ -268,8 +254,7 @@ fun NavigationButtons(
                 )
             } else {
                 Text(
-                    text = "上一题",
-                    color = MaterialTheme.colorScheme.onSurface
+                    text = "上一题"
                 )
             }
         }
@@ -307,12 +292,13 @@ fun NavigationButtons(
                 if (isLoading) {
                     CircularProgressIndicator(
                         color = Color.White,
-                        modifier = Modifier.size(20.dp).testTag("Circular Progress Indicator")
+                        modifier = Modifier
+                            .size(20.dp)
+                            .testTag("Circular Progress Indicator")
                     )
                 } else {
                     Text(
-                        text = "下一题",
-                        color = MaterialTheme.colorScheme.onPrimary
+                        text = "下一题"
                     )
                 }
             }
@@ -370,7 +356,7 @@ fun QuestionNavigationDialog(
                             .background(
                                 color = when {
                                     isCurrent -> MaterialTheme.colorScheme.primary
-                                    isAnswered -> MaterialTheme.colorScheme.primary.copy(0.3f)
+                                    isAnswered -> MaterialTheme.colorScheme.primary.copy(0.5f)
                                     else -> MaterialTheme.colorScheme.surfaceVariant
                                 },
                                 shape = CircleShape

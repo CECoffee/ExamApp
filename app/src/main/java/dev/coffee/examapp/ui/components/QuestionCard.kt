@@ -1,5 +1,6 @@
 package dev.coffee.examapp.ui.components
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -24,6 +25,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -133,7 +135,9 @@ fun QuestionCard(
                             Text(text = "你的答案:", modifier = Modifier.wrapContentWidth())
                             LatexWebview(
                                 latex = userAnswer,
-                                Modifier.fillMaxWidth().testTag("user_answer_tag"),
+                                Modifier
+                                    .fillMaxWidth()
+                                    .testTag("user_answer_tag"),
                                 onClick = {}
                             )
                         }
@@ -147,7 +151,9 @@ fun QuestionCard(
                             Text(text = "正确答案:", modifier = Modifier.padding(bottom = 8.dp))
                             LatexWebview(
                                 latex = question.correctAnswer ?: "",
-                                modifier = Modifier.fillMaxWidth().testTag("correct_answer_tag"),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .testTag("correct_answer_tag"),
                                 onClick = {}
                             )
                         }
@@ -222,17 +228,19 @@ fun QuestionCard(
                     when (question.questionType) {
 
                         FILL_IN_THE_BLANK -> {
-                            MathLiveEditor(
-                                initialLatex = userAnswer,
-                                onAnswerChanged = { newLatex ->
-                                    val finalLatex = newLatex.replace("""\exponentialE""", "e")
-                                    onAnswerChanged(finalLatex)
-                                },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .testTag("fill_blank_input")
-                                    .wrapContentHeight()
-                            )
+                            key(question.id) {
+                                MathLiveEditor(
+                                    initialLatex = userAnswer,
+                                    onAnswerChanged = { newLatex ->
+                                        val finalLatex = newLatex.replace("""\exponentialE""", "e")
+                                        onAnswerChanged(finalLatex)
+                                    },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .testTag("fill_blank_input")
+                                        .wrapContentHeight()
+                                )
+                            }
                         }
 
                         SINGLE_CHOICE -> {
@@ -285,7 +293,9 @@ fun QuestionCard(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .clickable {
-                                                if (isSelected) selectedIndices.remove(index) else selectedIndices.add(index)
+                                                if (isSelected) selectedIndices.remove(index) else selectedIndices.add(
+                                                    index
+                                                )
                                                 onAnswerChanged("[" + selectedIndices.sorted().joinToString(",") + "]")
                                             }
                                             .padding(vertical = 8.dp)

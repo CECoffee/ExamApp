@@ -74,9 +74,14 @@ class ExamViewModel(
                 val response = apiService.getQuestion(questionId)
                 if (response.isSuccessful) {
                     val question = response.body()
-                    // 保留用户答案（如果有）
                     question?.let { q ->
-                        _currentQuestion.value = q.copy(myAnswer = _userAnswer.value)
+                        if (_answeredQuestions.value.contains(_currentQuestionIndex.value)) {
+                            _userAnswer.value = q.myAnswer.toString()
+                            _currentQuestion.value = q
+                        } else {
+                            _userAnswer.value = ""
+                            _currentQuestion.value = q.copy(myAnswer = "")
+                        }
                     }
                 } else {
                     _errorMessage.value = "加载题目失败: ${response.code()}"
@@ -97,20 +102,49 @@ class ExamViewModel(
     }
 
     fun navigateToNext() {
-        if (_userAnswer.value.isEmpty()) {
-            _errorMessage.value = "请输入答案"
-        } else {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                if (_userAnswer.value.isNotEmpty()) {
+                    submitCurrentAnswer()
+                }
+                _currentQuestionIndex.value++
+                loadQuestion(questionIds[_currentQuestionIndex.value])
+            } catch (e: Exception) {
+                _errorMessage.value = e.message
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun navigateToPrevious() {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                if (_userAnswer.value.isNotEmpty()) {
+                    submitCurrentAnswer()
+                }
+                _currentQuestionIndex.value--
+                loadQuestion(questionIds[_currentQuestionIndex.value])
+            } catch (e: Exception) {
+                _errorMessage.value = e.message
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun navigateToQuestion(index: Int) {
+        if (index in questionIds.indices) {
             viewModelScope.launch {
                 _isLoading.value = true
                 try {
-                    submitCurrentAnswer()
-                    val nextIndex = _currentQuestionIndex.value + 1
-                    if (nextIndex < questionIds.size) {
-                        _currentQuestionIndex.value = nextIndex
-                        loadQuestion(questionIds[nextIndex])
-                    } else {
-                        finishExam()
+                    if (_userAnswer.value.isNotEmpty()) {
+                        submitCurrentAnswer()
                     }
+                    _currentQuestionIndex.value = index
+                    loadQuestion(questionIds[index])
                 } catch (e: Exception) {
                     _errorMessage.value = e.message
                 } finally {
@@ -120,16 +154,15 @@ class ExamViewModel(
         }
     }
 
-    fun navigateToPrevious() {
+    fun finishExam() {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                submitCurrentAnswer()
-                val prevIndex = _currentQuestionIndex.value - 1
-                if (prevIndex >= 0) {
-                    _currentQuestionIndex.value = prevIndex
-                    loadQuestion(questionIds[prevIndex])
+                if (_userAnswer.value.isNotEmpty()) {
+                    submitCurrentAnswer()
                 }
+                apiService.submitExam(examId, ScoreRequest(score.value))
+                _examFinished.value = true
             } catch (e: Exception) {
                 _errorMessage.value = e.message
             } finally {
@@ -142,12 +175,10 @@ class ExamViewModel(
         currentQuestion.value?.let { question ->
             _userAnswer.value.let { answer ->
                 try {
-                    _isCorrect.value = (answer == _currentQuestion.value?.correctAnswer)
+                    _isCorrect.value = (answer == question.correctAnswer)
                     calculateScore()
                     apiService.submitExamAnswer(question.id, SubmitAnswerRequest(answer, _isCorrect.value))
-                    // 新增：记录已答题号
                     _answeredQuestions.value = _answeredQuestions.value + _currentQuestionIndex.value
-                    _userAnswer.value = ""
                 } catch (e: Exception) {
                     _errorMessage.value = "答案提交失败: ${e.message}"
                     throw e
@@ -160,52 +191,7 @@ class ExamViewModel(
         if (_isCorrect.value) _score.value += _scorePerQuestion
     }
 
-
     fun clearToast() {
         _errorMessage.value = null
-    }
-
-    fun finishExam() {
-        viewModelScope.launch {
-            _isLoading.value = true
-            try {
-                apiService.submitExam(examId, ScoreRequest(score.value))
-                _examFinished.value = true
-            } catch (e: Exception) {
-                _errorMessage.value = "考试提交失败: ${e.message}"
-            } finally {
-                _isLoading.value = false
-            }
-        }
-    }
-
-
-    // 在 navigateToQuestion 方法中，也要处理：如果当前题有答案，记录当前 index
-    fun navigateToQuestion(index: Int) {
-        if (index in questionIds.indices) {
-            viewModelScope.launch {
-                _isLoading.value = true
-                try {
-                    // 提交当前答案（如果有）
-                    if (_userAnswer.value.isNotEmpty()) {
-                        submitCurrentAnswer()
-                    }
-                    // 新增：如果当前有答案，记录当前 index
-                    if (_userAnswer.value.isNotEmpty()) {
-                        _answeredQuestions.value = _answeredQuestions.value + _currentQuestionIndex.value
-                    }
-                    // 更新当前题目索引
-                    _currentQuestionIndex.value = index
-                    // 加载新题目
-                    loadQuestion(questionIds[index])
-                    // 重置当前答案
-                    _userAnswer.value = ""
-                } catch (e: Exception) {
-                    _errorMessage.value = "跳转题目失败: ${e.message}"
-                } finally {
-                    _isLoading.value = false
-                }
-            }
-        }
     }
 }

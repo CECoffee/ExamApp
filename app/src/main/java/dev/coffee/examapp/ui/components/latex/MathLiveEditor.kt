@@ -25,6 +25,7 @@ import kotlin.random.Random
 
 @Composable
 fun MathLiveEditor(
+    key: Int = 0,
     initialLatex: String = "",
     onAnswerChanged: (String) -> Unit = {},
     modifier: Modifier = Modifier

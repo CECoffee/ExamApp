@@ -105,9 +105,7 @@ class ExamViewModel(
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                if (_userAnswer.value.isNotEmpty()) {
-                    submitCurrentAnswer()
-                }
+                submitCurrentAnswer()
                 _currentQuestionIndex.value++
                 loadQuestion(questionIds[_currentQuestionIndex.value])
             } catch (e: Exception) {
@@ -122,9 +120,7 @@ class ExamViewModel(
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                if (_userAnswer.value.isNotEmpty()) {
-                    submitCurrentAnswer()
-                }
+                submitCurrentAnswer()
                 _currentQuestionIndex.value--
                 loadQuestion(questionIds[_currentQuestionIndex.value])
             } catch (e: Exception) {
@@ -140,9 +136,7 @@ class ExamViewModel(
             viewModelScope.launch {
                 _isLoading.value = true
                 try {
-                    if (_userAnswer.value.isNotEmpty()) {
-                        submitCurrentAnswer()
-                    }
+                    submitCurrentAnswer()
                     _currentQuestionIndex.value = index
                     loadQuestion(questionIds[index])
                 } catch (e: Exception) {
@@ -158,9 +152,7 @@ class ExamViewModel(
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                if (_userAnswer.value.isNotEmpty()) {
-                    submitCurrentAnswer()
-                }
+                submitCurrentAnswer()
                 apiService.submitExam(examId, ScoreRequest(score.value))
                 _examFinished.value = true
             } catch (e: Exception) {
@@ -178,7 +170,9 @@ class ExamViewModel(
                     _isCorrect.value = (answer == question.correctAnswer)
                     calculateScore()
                     apiService.submitExamAnswer(question.id, SubmitAnswerRequest(answer, _isCorrect.value))
-                    _answeredQuestions.value = _answeredQuestions.value + _currentQuestionIndex.value
+                    if (answer.isNotEmpty()) {
+                        _answeredQuestions.value = _answeredQuestions.value + _currentQuestionIndex.value
+                    }
                 } catch (e: Exception) {
                     _errorMessage.value = "答案提交失败: ${e.message}"
                     throw e
